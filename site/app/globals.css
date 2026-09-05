@@ -48,7 +48,9 @@
   --input: oklch(1 0 0 / 14%);
   --ring: oklch(0.62 0.24 24);
   --radius: 0.7rem;
-  --neon: rgba(239, 45, 67, .42);
+  --neon:      rgba(239, 45, 67, 0.42);
+  --neon-soft: rgba(239, 45, 67, 0.15);
+  --neon-hard: rgba(239, 45, 67, 0.70);
 }
 
 * { @apply border-border outline-ring/50; }
@@ -68,3 +70,14 @@ body { @apply bg-background text-foreground font-sans; }
 /* Range input accent across browsers */
 input[type='range']::-webkit-slider-thumb { accent-color: var(--primary); }
 input[type='range']::-moz-range-thumb     { background: var(--primary); border: none; }
+
+/* Offset anchor targets so sticky header doesn't cover them */
+section[id], footer[id] { scroll-margin-top: 80px; }
+
+/* Smooth scrollbar */
+::-webkit-scrollbar       { width: 6px; background: var(--background); }
+::-webkit-scrollbar-thumb { background: rgba(239,45,67,0.30); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(239,45,67,0.55); }
+
+/* Global transition default for interactive elements */
+a, button { transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); }

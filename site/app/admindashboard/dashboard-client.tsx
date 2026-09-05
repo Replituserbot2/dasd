@@ -88,6 +88,7 @@ export default function DashboardClient({ initialContent }: { initialContent: Si
         fileUrl: result.url,
         file: file.name,
         size: formatSize(file.size),
+        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
       })
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : 'Upload failed.')

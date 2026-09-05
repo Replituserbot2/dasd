@@ -3,11 +3,11 @@ import path from 'path'
 import { NextResponse } from 'next/server'
 import { isAuthed } from '@/lib/auth'
 
-// Files are saved straight onto this server's disk, into /public/uploads.
-// Next.js serves everything under /public as a static file automatically,
-// so a saved file at public/uploads/foo.zip becomes downloadable at
-// https://yourdomain.com/uploads/foo.zip with no extra code needed.
-const UPLOAD_DIR = path.join(process.cwd(), 'public', 'uploads')
+// Files are saved to disk in /data/uploads (NOT /public — public assets are
+// cached by Next at startup, so a file saved there mid-run 404s until a
+// restart). Serving happens through app/uploads/[filename]/route.ts, which
+// reads fresh from disk on every request, so new uploads work immediately.
+const UPLOAD_DIR = path.join(process.cwd(), 'data', 'uploads')
 const MAX_SIZE_BYTES = 500 * 1024 * 1024 // 500 MB
 
 // Keep the filename but strip anything that isn't safe on disk / in a URL,

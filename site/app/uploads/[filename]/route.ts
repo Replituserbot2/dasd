@@ -16,8 +16,15 @@ const CONTENT_TYPES: Record<string, string> = {
   '.jpg': 'image/jpeg',
   '.jpeg': 'image/jpeg',
   '.gif': 'image/gif',
+  '.webp': 'image/webp',
+  '.svg': 'image/svg+xml',
+  '.ico': 'image/x-icon',
+  '.bmp': 'image/bmp',
   '.txt': 'text/plain',
   '.pdf': 'application/pdf',
+  '.mp3': 'audio/mpeg',
+  '.ogg': 'audio/ogg',
+  '.wav': 'audio/wav',
 }
 
 export async function GET(
@@ -37,12 +44,14 @@ export async function GET(
     const data = await fs.readFile(filePath)
     const ext = path.extname(filename).toLowerCase()
     const contentType = CONTENT_TYPES[ext] || 'application/octet-stream'
+    const isInline = contentType.startsWith('image/') || contentType.startsWith('audio/')
+    const disposition = isInline ? 'inline' : `attachment; filename="${filename}"`
 
     return new NextResponse(data, {
       status: 200,
       headers: {
         'Content-Type': contentType,
-        'Content-Disposition': `attachment; filename="${filename}"`,
+        'Content-Disposition': disposition,
         'Content-Length': String(data.length),
         'Cache-Control': 'public, max-age=0',
       },

@@ -36,6 +36,24 @@ export type FeatureIcon = (typeof FEATURE_ICONS)[number]
 export type Feature = { id: string; icon: FeatureIcon; title: string; text: string }
 export type HeroBadge = { id: string; text: string }
 
+export type ShowcaseItem = {
+  id: string
+  title: string
+  description: string
+  tag?: string
+  imageUrl: string
+}
+
+export type BackgroundMusicConfig = {
+  enabled: boolean
+  youtubeUrl: string
+  trackTitle: string
+  trackArtist?: string
+  defaultVolume: number // 0 - 100
+  autoplay: boolean
+  loop: boolean
+}
+
 export type SiteContent = {
   siteName: string
   heroTitle: string
@@ -44,6 +62,10 @@ export type SiteContent = {
   accentColor: string
   heroBadges: HeroBadge[]
   features: Feature[]
+  showcaseTitle: string
+  showcaseSubtitle: string
+  showcase: ShowcaseItem[]
+  music: BackgroundMusicConfig
   versions: Version[]
   featuredVersionId: string
   faqs: Faq[]
@@ -67,6 +89,18 @@ export const defaultContent: SiteContent = {
     { id: 'ft2', icon: 'code', title: 'Pixel perfect', text: 'Every detail is crafted for clarity. See everything that matters instantly.' },
     { id: 'ft3', icon: 'lock', title: 'Privacy focused', text: 'Works offline. No tracking. Your setup stays private and secure.' },
   ],
+  showcaseTitle: 'Client Interface & HUD',
+  showcaseSubtitle: 'Experience the sleek, distraction-free interface engineered for maximum clarity and competitive edge.',
+  showcase: [],
+  music: {
+    enabled: false,
+    youtubeUrl: '',
+    trackTitle: 'Background Music',
+    trackArtist: '',
+    defaultVolume: 30,
+    autoplay: false,
+    loop: true,
+  },
   versions: [
     { id: 'v1', version: 'v2.4.0', date: 'Aug 18, 2026', size: '18.4 MB', file: 'Stratoukos-Client-v2.4.0.zip' },
     { id: 'v2', version: 'v2.3.1', date: 'Jul 29, 2026', size: '17.9 MB', file: 'Stratoukos-Client-v2.3.1.zip' },
@@ -110,6 +144,26 @@ function migrate(content: SiteContent): SiteContent {
     id: f.id || `feature-${i}`,
     icon: FEATURE_ICONS.includes(f.icon) ? f.icon : 'star',
   }))
+  const showcase = (content.showcase ?? defaultContent.showcase).map((s, i) => ({
+    ...s,
+    id: s.id || `showcase-${i}`,
+    title: s.title ?? '',
+    description: s.description ?? '',
+    tag: s.tag ?? 'Showcase',
+    imageUrl: s.imageUrl ?? '',
+  }))
+  const music: BackgroundMusicConfig = {
+    enabled: content.music?.enabled ?? defaultContent.music.enabled,
+    youtubeUrl: content.music?.youtubeUrl ?? defaultContent.music.youtubeUrl,
+    trackTitle: content.music?.trackTitle ?? defaultContent.music.trackTitle,
+    trackArtist: content.music?.trackArtist ?? defaultContent.music.trackArtist,
+    defaultVolume:
+      typeof content.music?.defaultVolume === 'number'
+        ? content.music.defaultVolume
+        : defaultContent.music.defaultVolume,
+    autoplay: content.music?.autoplay ?? defaultContent.music.autoplay,
+    loop: content.music?.loop ?? defaultContent.music.loop,
+  }
   return {
     ...content,
     versions,
@@ -118,6 +172,10 @@ function migrate(content: SiteContent): SiteContent {
     team,
     heroBadges,
     features,
+    showcaseTitle: content.showcaseTitle ?? defaultContent.showcaseTitle,
+    showcaseSubtitle: content.showcaseSubtitle ?? defaultContent.showcaseSubtitle,
+    showcase,
+    music,
     accentColor: content.accentColor || defaultContent.accentColor,
     footerTagline: content.footerTagline ?? defaultContent.footerTagline,
   }

@@ -6,17 +6,19 @@ import {
   CheckCircle2,
   FileArchive,
   HelpCircle,
+  Image as ImageIcon,
   LayoutGrid,
   LockKeyhole,
   LogOut,
   Menu,
+  Music,
   PanelBottom,
   Settings,
   Tag,
   Users,
   X,
 } from 'lucide-react'
-import type { Faq, Feature, HeroBadge, SiteContent, TeamMember, Version } from '@/lib/store'
+import type { BackgroundMusicConfig, Faq, Feature, HeroBadge, ShowcaseItem, SiteContent, TeamMember, Version } from '@/lib/store'
 import GeneralSection from './sections/general-section'
 import BadgesSection from './sections/badges-section'
 import FeaturesSection from './sections/features-section'
@@ -24,13 +26,17 @@ import VersionsSection from './sections/versions-section'
 import FaqSection from './sections/faq-section'
 import CreditsSection from './sections/credits-section'
 import FooterSection from './sections/footer-section'
+import ShowcaseSection from './sections/showcase-section'
+import MusicSection from './sections/music-section'
 
-type TabKey = 'general' | 'badges' | 'features' | 'versions' | 'faq' | 'credits' | 'footer'
+type TabKey = 'general' | 'badges' | 'features' | 'showcase' | 'music' | 'versions' | 'faq' | 'credits' | 'footer'
 
 const TABS: { key: TabKey; label: string; icon: ComponentType<{ size?: number; className?: string }> }[] = [
   { key: 'general', label: 'General', icon: Settings },
   { key: 'badges', label: 'Hero badges', icon: Tag },
   { key: 'features', label: 'Features', icon: LayoutGrid },
+  { key: 'showcase', label: 'Showcase', icon: ImageIcon },
+  { key: 'music', label: 'Music player', icon: Music },
   { key: 'versions', label: 'Versions', icon: FileArchive },
   { key: 'faq', label: 'FAQ', icon: HelpCircle },
   { key: 'credits', label: 'Credits', icon: Users },
@@ -56,6 +62,7 @@ export default function DashboardClient({ initialContent }: { initialContent: Si
   const [uploadPct, setUploadPct] = useState<number>(0)
   const fileInputs = useRef<Record<string, HTMLInputElement | null>>({})
   const avatarInputs = useRef<Record<string, HTMLInputElement | null>>({})
+  const showcaseInputs = useRef<Record<string, HTMLInputElement | null>>({})
 
   const isDirty = useMemo(() => JSON.stringify(content) !== savedSnapshot, [content, savedSnapshot])
 
@@ -84,6 +91,42 @@ export default function DashboardClient({ initialContent }: { initialContent: Si
     setContent((c) => ({ ...c, features: c.features.map((f) => (f.id === id ? { ...f, ...patch } : f)) }))
   const removeFeature = (id: string) =>
     setContent((c) => ({ ...c, features: c.features.filter((f) => f.id !== id) }))
+
+  // Showcase
+  const addShowcaseItem = () => {
+    const id = makeId('sc')
+    setContent((c) => ({
+      ...c,
+      showcase: [...c.showcase, { id, title: '', description: '', tag: '', imageUrl: '' }],
+    }))
+  }
+  const updateShowcaseItem = (id: string, patch: Partial<ShowcaseItem>) =>
+    setContent((c) => ({
+      ...c,
+      showcase: c.showcase.map((s) => (s.id === id ? { ...s, ...patch } : s)),
+    }))
+  const removeShowcaseItem = (id: string) =>
+    setContent((c) => ({ ...c, showcase: c.showcase.filter((s) => s.id !== id) }))
+  const moveShowcaseItemUp = (index: number) => {
+    if (index === 0) return
+    setContent((c) => {
+      const items = [...c.showcase]
+      ;[items[index - 1], items[index]] = [items[index], items[index - 1]]
+      return { ...c, showcase: items }
+    })
+  }
+  const moveShowcaseItemDown = (index: number) => {
+    setContent((c) => {
+      if (index >= c.showcase.length - 1) return c
+      const items = [...c.showcase]
+      ;[items[index], items[index + 1]] = [items[index + 1], items[index]]
+      return { ...c, showcase: items }
+    })
+  }
+
+  // Music
+  const updateMusic = (patch: Partial<BackgroundMusicConfig>) =>
+    setContent((c) => ({ ...c, music: { ...c.music, ...patch } }))
 
   // Versions
   const updateVersion = (id: string, patch: Partial<Version>) =>
@@ -161,6 +204,23 @@ export default function DashboardClient({ initialContent }: { initialContent: Si
     try {
       const result = await uploadRaw(file, setUploadPct)
       updateMember(id, { avatarUrl: result.url })
+    } catch (err) {
+      setErrorMsg(err instanceof Error ? err.message : 'Upload failed.')
+    } finally {
+      setUploadingIdx(null)
+    }
+  }
+
+  const handleShowcaseImageSelect = async (id: string, fileList: FileList | null) => {
+    const file = fileList?.[0]
+    if (!file) return
+    const key = `showcase-${id}`
+    setUploadingIdx(key)
+    setUploadPct(0)
+    setErrorMsg('')
+    try {
+      const result = await uploadRaw(file, setUploadPct)
+      updateShowcaseItem(id, { imageUrl: result.url })
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : 'Upload failed.')
     } finally {
@@ -364,6 +424,30 @@ export default function DashboardClient({ initialContent }: { initialContent: Si
                 onUpdate={updateFeature}
                 onRemove={removeFeature}
               />
+            )}
+
+            {activeTab === 'showcase' && (
+              <ShowcaseSection
+                title={content.showcaseTitle}
+                subtitle={content.showcaseSubtitle}
+                items={content.showcase}
+                uploadingIdx={uploadingIdx}
+                uploadPct={uploadPct}
+                onUpdateTitle={(t) => update('showcaseTitle', t)}
+                onUpdateSubtitle={(s) => update('showcaseSubtitle', s)}
+                onAdd={addShowcaseItem}
+                onUpdate={updateShowcaseItem}
+                onRemove={removeShowcaseItem}
+                onMoveUp={moveShowcaseItemUp}
+                onMoveDown={moveShowcaseItemDown}
+                onUploadClick={(id) => showcaseInputs.current[id]?.click()}
+                registerFileInput={(id, el) => { showcaseInputs.current[id] = el }}
+                onFileSelected={handleShowcaseImageSelect}
+              />
+            )}
+
+            {activeTab === 'music' && (
+              <MusicSection music={content.music} onUpdate={updateMusic} />
             )}
 
             {activeTab === 'versions' && (

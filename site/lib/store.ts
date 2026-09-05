@@ -2,14 +2,53 @@ import { promises as fs } from 'fs'
 import path from 'path'
 
 export type Version = { id: string; version: string; date: string; size: string; file: string; fileUrl?: string }
+export type Faq = { id: string; question: string; answer: string }
+
+// discordId is the source of truth when set — the live Discord username,
+// display name and avatar are looked up by ID at render time. name/role and
+// avatarUrl are the manual fallback used when no Discord ID is set, or when
+// the lookup fails (e.g. no bot token configured on the server).
+export type TeamMember = {
+  id: string
+  name: string
+  role: string
+  avatarUrl?: string
+  discordId?: string
+  discordUrl?: string
+}
+
+export const FEATURE_ICONS = [
+  'gauge',
+  'code',
+  'lock',
+  'zap',
+  'shield',
+  'star',
+  'rocket',
+  'trophy',
+  'sparkles',
+  'users',
+  'gamepad',
+  'heart',
+] as const
+export type FeatureIcon = (typeof FEATURE_ICONS)[number]
+
+export type Feature = { id: string; icon: FeatureIcon; title: string; text: string }
+export type HeroBadge = { id: string; text: string }
 
 export type SiteContent = {
   siteName: string
   heroTitle: string
   heroSubtitle: string
   downloadName: string
+  accentColor: string
+  heroBadges: HeroBadge[]
+  features: Feature[]
   versions: Version[]
   featuredVersionId: string
+  faqs: Faq[]
+  team: TeamMember[]
+  footerTagline: string
 }
 
 export const defaultContent: SiteContent = {
@@ -17,16 +56,40 @@ export const defaultContent: SiteContent = {
   heroTitle: 'STRATOUKOS CLIENT',
   heroSubtitle: 'Dominate with the sharpest HUD overlay ever created.',
   downloadName: 'Stratoukos Client v2.4.0',
+  accentColor: '#ef2d43',
+  heroBadges: [
+    { id: 'b1', text: 'Optimized HUD' },
+    { id: 'b2', text: 'PvP ready' },
+    { id: 'b3', text: 'Zero distractions' },
+  ],
+  features: [
+    { id: 'ft1', icon: 'gauge', title: 'Performance first', text: 'Lightweight design that never compromises your FPS. Stay competitive.' },
+    { id: 'ft2', icon: 'code', title: 'Pixel perfect', text: 'Every detail is crafted for clarity. See everything that matters instantly.' },
+    { id: 'ft3', icon: 'lock', title: 'Privacy focused', text: 'Works offline. No tracking. Your setup stays private and secure.' },
+  ],
   versions: [
     { id: 'v1', version: 'v2.4.0', date: 'Aug 18, 2026', size: '18.4 MB', file: 'Stratoukos-Client-v2.4.0.zip' },
     { id: 'v2', version: 'v2.3.1', date: 'Jul 29, 2026', size: '17.9 MB', file: 'Stratoukos-Client-v2.3.1.zip' },
     { id: 'v3', version: 'v2.2.0', date: 'Jun 14, 2026', size: '16.8 MB', file: 'Stratoukos-Client-v2.2.0.zip' },
   ],
   featuredVersionId: 'v1',
+  faqs: [
+    { id: 'f1', question: 'What is Stratoukos Client?', answer: 'Stratoukos Client is a premium HUD overlay designed for competitive gaming, offering clean visuals and zero distractions.' },
+    { id: 'f2', question: 'Is it compatible with my launcher?', answer: 'Stratoukos Client supports all major launchers including Minecraft, Lunar Client, and Feather Client.' },
+    { id: 'f3', question: 'How do I install it?', answer: 'Download the latest version, extract the zip file, and follow the included installation guide. Setup takes less than 2 minutes.' },
+    { id: 'f4', question: 'Does it affect performance?', answer: 'No. Stratoukos Client is optimized to have minimal impact on your frame rate, typically adding less than 1% overhead.' },
+    { id: 'f5', question: 'Is my data safe?', answer: 'Yes. Stratoukos Client runs locally with no tracking or data collection. Your settings stay on your machine.' },
+  ],
+  team: [
+    { id: 't1', name: 'Design & Development', role: 'Core team' },
+    { id: 't2', name: 'Community', role: 'Beta testers and feedback contributors' },
+    { id: 't3', name: 'Special Thanks', role: 'Everyone making Stratoukos Client possible' },
+  ],
+  footerTagline: 'Built for competitive excellence.',
 }
 
-// Fills in ids/featuredVersionId for content saved before those fields
-// existed, and makes sure featuredVersionId always points at a real entry.
+// Fills in ids/defaults for content saved before newer fields existed, and
+// makes sure featuredVersionId always points at a real entry.
 function migrate(content: SiteContent): SiteContent {
   const versions = (content.versions ?? []).map((v, i) => ({
     ...v,
@@ -36,7 +99,28 @@ function migrate(content: SiteContent): SiteContent {
     content.featuredVersionId && versions.some((v) => v.id === content.featuredVersionId)
       ? content.featuredVersionId
       : versions[0]?.id || ''
-  return { ...content, versions, featuredVersionId }
+  const faqs = (content.faqs ?? defaultContent.faqs).map((f, i) => ({ ...f, id: f.id || `faq-${i}` }))
+  const team = (content.team ?? defaultContent.team).map((t, i) => ({ ...t, id: t.id || `team-${i}` }))
+  const heroBadges = (content.heroBadges ?? defaultContent.heroBadges).map((b, i) => ({
+    ...b,
+    id: b.id || `badge-${i}`,
+  }))
+  const features = (content.features ?? defaultContent.features).map((f, i) => ({
+    ...f,
+    id: f.id || `feature-${i}`,
+    icon: FEATURE_ICONS.includes(f.icon) ? f.icon : 'star',
+  }))
+  return {
+    ...content,
+    versions,
+    featuredVersionId,
+    faqs,
+    team,
+    heroBadges,
+    features,
+    accentColor: content.accentColor || defaultContent.accentColor,
+    footerTagline: content.footerTagline ?? defaultContent.footerTagline,
+  }
 }
 
 const KEY = 'site-content'

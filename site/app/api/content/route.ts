@@ -27,7 +27,9 @@ export async function POST(req: Request) {
     typeof body?.heroSubtitle !== 'string' ||
     typeof body?.downloadName !== 'string' ||
     typeof body?.featuredVersionId !== 'string' ||
-    !Array.isArray(body?.versions)
+    !Array.isArray(body?.versions) ||
+    !Array.isArray(body?.faqs) ||
+    !Array.isArray(body?.team)
   ) {
     return NextResponse.json({ error: 'Malformed content payload.' }, { status: 400 })
   }

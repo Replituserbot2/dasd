@@ -1,42 +1,55 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, type CSSProperties } from 'react'
 import {
   ArrowDownToLine,
   ChevronDown,
   ChevronUp,
-  Code2,
+  ExternalLink,
   FileArchive,
-  Gauge,
   HelpCircle,
-  LockKeyhole,
   Sparkles,
   Users,
 } from 'lucide-react'
 import type { SiteContent } from '@/lib/store'
+import type { DiscordUser } from '@/lib/discord'
+import { FEATURE_ICON_MAP } from '@/lib/feature-icons'
+import { accentForeground, accentToRgba } from '@/lib/color'
 
-const faqs = [
-  { q: 'What is Stratoukos Client?', a: 'Stratoukos Client is a premium HUD overlay designed for competitive gaming, offering clean visuals and zero distractions.' },
-  { q: 'Is it compatible with my launcher?', a: 'Stratoukos Client supports all major launchers including Minecraft, Lunar Client, and Feather Client.' },
-  { q: 'How do I install it?', a: 'Download the latest version, extract the zip file, and follow the included installation guide. Setup takes less than 2 minutes.' },
-  { q: 'Does it affect performance?', a: 'No. Stratoukos Client is optimized to have minimal impact on your frame rate, typically adding less than 1% overhead.' },
-  { q: 'Is my data safe?', a: 'Yes. Stratoukos Client runs locally with no tracking or data collection. Your settings stay on your machine.' },
-]
-
-const credits = [
-  { name: 'Design & Development', contributors: 'Core team' },
-  { name: 'Community', contributors: 'Beta testers and feedback contributors' },
-  { name: 'Special Thanks', contributors: 'Everyone making Stratoukos Client possible' },
-]
-
-export default function HomeClient({ content }: { content: SiteContent }) {
-  const { siteName, heroTitle, heroSubtitle, downloadName, versions, featuredVersionId } = content
+export default function HomeClient({
+  content,
+  discordUsers,
+}: {
+  content: SiteContent
+  discordUsers: Record<string, DiscordUser | null>
+}) {
+  const {
+    siteName,
+    heroTitle,
+    heroSubtitle,
+    downloadName,
+    accentColor,
+    heroBadges,
+    features,
+    versions,
+    featuredVersionId,
+    faqs,
+    team,
+    footerTagline,
+  } = content
   const featured = versions.find((v) => v.id === featuredVersionId) ?? versions[0]
   const [showVersions, setShowVersions] = useState(false)
-  const [expandedFaq, setExpandedFaq] = useState<number | null>(null)
+  const [expandedFaq, setExpandedFaq] = useState<string | null>(null)
+
+  const themeStyle = {
+    '--primary': accentColor,
+    '--ring': accentColor,
+    '--primary-foreground': accentForeground(accentColor),
+    '--neon': accentToRgba(accentColor, 0.42),
+  } as CSSProperties
 
   return (
-    <main className="min-h-screen overflow-hidden bg-background text-foreground">
+    <main style={themeStyle} className="min-h-screen overflow-hidden bg-background text-foreground">
       <header className="sticky top-0 z-40 border-b border-border/40 bg-background/70 backdrop-blur-2xl">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 lg:px-8">
           <a href="#top" className="flex items-center gap-2.5">
@@ -66,7 +79,12 @@ export default function HomeClient({ content }: { content: SiteContent }) {
       </header>
 
       <section id="top" className="relative isolate flex min-h-[calc(100vh-64px)] items-center justify-center px-5 py-20 text-center">
-        <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_50%_30%,rgba(239,45,67,.22),transparent_50%),radial-gradient(ellipse_at_15%_80%,rgba(114,12,27,.28),transparent_40%)]" />
+        <div
+          className="pointer-events-none absolute inset-0 -z-10"
+          style={{
+            background: `radial-gradient(ellipse at 50% 30%, ${accentToRgba(accentColor, 0.22)}, transparent 50%), radial-gradient(ellipse at 15% 80%, ${accentToRgba(accentColor, 0.28)}, transparent 40%)`,
+          }}
+        />
         <div className="pointer-events-none absolute left-1/2 top-1/3 -z-10 h-96 w-96 -translate-x-1/2 rounded-full bg-primary/5 blur-3xl" />
 
         <div className="mx-auto flex max-w-3xl flex-col items-center gap-8">
@@ -99,41 +117,49 @@ export default function HomeClient({ content }: { content: SiteContent }) {
             </a>
           </div>
 
-          <div className="mt-6 flex flex-wrap justify-center gap-2">
-            <span className="rounded-full border border-border/50 bg-card/50 px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Optimized HUD</span>
-            <span className="rounded-full border border-border/50 bg-card/50 px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">PvP ready</span>
-            <span className="rounded-full border border-border/50 bg-card/50 px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Zero distractions</span>
-          </div>
+          {heroBadges.length > 0 && (
+            <div className="mt-6 flex flex-wrap justify-center gap-2">
+              {heroBadges.map((badge) => (
+                <span
+                  key={badge.id}
+                  className="rounded-full border border-border/50 bg-card/50 px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground"
+                >
+                  {badge.text}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
-      <section id="features" className="border-t border-border/40 px-5 py-20 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <div className="mb-12">
-            <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary mb-2">Why Choose</p>
-            <h2 className="max-w-3xl text-balance font-mono text-4xl font-bold tracking-tight sm:text-5xl">
-              Built for champions.
-            </h2>
+      {features.length > 0 && (
+        <section id="features" className="border-t border-border/40 px-5 py-20 lg:px-8">
+          <div className="mx-auto max-w-7xl">
+            <div className="mb-12">
+              <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary mb-2">Why Choose</p>
+              <h2 className="max-w-3xl text-balance font-mono text-4xl font-bold tracking-tight sm:text-5xl">
+                Built for champions.
+              </h2>
+            </div>
+            <div className="grid gap-px overflow-hidden rounded-2xl border border-border/40 bg-border md:grid-cols-3">
+              {features.map((feature) => {
+                const Icon = FEATURE_ICON_MAP[feature.icon] ?? Sparkles
+                return (
+                  <article key={feature.id} className="bg-card/70 p-8 transition-colors hover:bg-card/90">
+                    <Icon className="mb-4 text-primary" size={24} />
+                    <h3 className="mb-2 font-mono text-sm font-bold uppercase tracking-wider">{feature.title}</h3>
+                    <p className="text-sm leading-6 text-muted-foreground">{feature.text}</p>
+                  </article>
+                )
+              })}
+            </div>
           </div>
-          <div className="grid gap-px overflow-hidden rounded-2xl border border-border/40 bg-border md:grid-cols-3">
-            {[
-              { icon: Gauge, title: 'Performance first', text: 'Lightweight design that never compromises your FPS. Stay competitive.' },
-              { icon: Code2, title: 'Pixel perfect', text: 'Every detail is crafted for clarity. See everything that matters instantly.' },
-              { icon: LockKeyhole, title: 'Privacy focused', text: 'Works offline. No tracking. Your setup stays private and secure.' },
-            ].map(({ icon: Icon, title, text }) => (
-              <article key={title} className="bg-card/70 p-8 transition-colors hover:bg-card/90">
-                <Icon className="mb-4 text-primary" size={24} />
-                <h3 className="mb-2 font-mono text-sm font-bold uppercase tracking-wider">{title}</h3>
-                <p className="text-sm leading-6 text-muted-foreground">{text}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       <section id="download" className="border-t border-border/40 px-5 py-20 lg:px-8">
         <div className="mx-auto max-w-4xl">
-          <div className="rounded-2xl border border-primary/20 bg-card/60 p-8 shadow-[0_0_40px_rgba(239,45,67,.1)] sm:p-10">
+          <div className="rounded-2xl border border-primary/20 bg-card/60 p-8 shadow-[0_0_40px_var(--neon)] sm:p-10">
             <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between mb-8">
               <div>
                 <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary mb-1">Latest</p>
@@ -229,22 +255,22 @@ export default function HomeClient({ content }: { content: SiteContent }) {
           </div>
 
           <div className="space-y-2">
-            {faqs.map((faq, idx) => (
+            {faqs.map((faq) => (
               <button
-                key={idx}
-                onClick={() => setExpandedFaq(expandedFaq === idx ? null : idx)}
+                key={faq.id}
+                onClick={() => setExpandedFaq(expandedFaq === faq.id ? null : faq.id)}
                 className="w-full text-left"
               >
                 <div className="flex items-center justify-between rounded-lg border border-border/40 bg-card/40 p-5 hover:bg-card/60 transition-colors">
                   <div className="flex items-center gap-3">
                     <HelpCircle size={16} className="text-primary shrink-0" />
-                    <p className="font-mono text-sm font-semibold">{faq.q}</p>
+                    <p className="font-mono text-sm font-semibold">{faq.question}</p>
                   </div>
-                  {expandedFaq === idx ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                  {expandedFaq === faq.id ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                 </div>
-                {expandedFaq === idx && (
+                {expandedFaq === faq.id && (
                   <div className="mt-2 rounded-lg border border-border/30 bg-background/50 p-4">
-                    <p className="text-sm leading-6 text-muted-foreground">{faq.a}</p>
+                    <p className="text-sm leading-6 text-muted-foreground">{faq.answer}</p>
                   </div>
                 )}
               </button>
@@ -262,23 +288,56 @@ export default function HomeClient({ content }: { content: SiteContent }) {
           </div>
 
           <div className="grid gap-6 md:grid-cols-3">
-            {credits.map((credit, idx) => (
-              <div key={idx} className="rounded-lg border border-border/40 bg-card/40 p-6">
-                <div className="flex items-start gap-3 mb-3">
-                  <Users size={18} className="text-primary shrink-0 mt-0.5" />
-                  <h3 className="font-mono text-sm font-bold">{credit.name}</h3>
+            {team.map((member) => {
+              const discordUser = member.discordId ? discordUsers[member.discordId] : null
+              const displayName = discordUser?.displayName || member.name
+              const avatarUrl = discordUser?.avatarUrl || member.avatarUrl
+              const profileUrl = discordUser?.profileUrl || member.discordUrl
+
+              return (
+                <div key={member.id} className="rounded-lg border border-border/40 bg-card/40 p-6 transition-colors hover:border-primary/30 hover:bg-card/60">
+                  <div className="mb-3 flex items-start gap-3">
+                    {avatarUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={avatarUrl}
+                        alt={displayName}
+                        className="size-10 shrink-0 rounded-full border border-border/50 object-cover"
+                      />
+                    ) : (
+                      <span className="flex size-10 shrink-0 items-center justify-center rounded-full border border-border/50 bg-background/60">
+                        <Users size={16} className="text-primary" />
+                      </span>
+                    )}
+                    <div className="flex min-w-0 flex-col">
+                      <h3 className="truncate font-mono text-sm font-bold">{displayName}</h3>
+                      {discordUser && (
+                        <span className="truncate text-xs text-muted-foreground">@{discordUser.username}</span>
+                      )}
+                      {profileUrl && (
+                        <a
+                          href={profileUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="mt-0.5 flex items-center gap-1 truncate text-xs text-primary hover:underline"
+                        >
+                          Discord profile <ExternalLink size={11} />
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                  <p className="text-sm text-muted-foreground">{member.role}</p>
                 </div>
-                <p className="text-sm text-muted-foreground">{credit.contributors}</p>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       </section>
 
       <footer className="border-t border-border/40 px-5 py-8 lg:px-8 bg-card/30">
         <div className="mx-auto flex max-w-7xl flex-col gap-3 font-mono text-xs uppercase tracking-wider text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-          <span>© 2026 {siteName}</span>
-          <span>Built for competitive excellence.</span>
+          <span>© {new Date().getFullYear()} {siteName}</span>
+          <span>{footerTagline}</span>
         </div>
       </footer>
     </main>

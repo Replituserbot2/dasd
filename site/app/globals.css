@@ -55,7 +55,8 @@
 
 * { @apply border-border outline-ring/50; }
 html { background: var(--background); scroll-behavior: smooth; }
-body { @apply bg-background text-foreground font-sans; }
+/* body is intentionally transparent so the fixed background layer shows through */
+body { @apply text-foreground font-sans; background: transparent; }
 ::selection { background: var(--primary); color: var(--primary-foreground); }
 
 /* Lightbox / modal fade-in */

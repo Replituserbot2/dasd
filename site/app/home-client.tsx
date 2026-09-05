@@ -17,6 +17,7 @@ import type { DiscordUser } from '@/lib/discord'
 import { FEATURE_ICON_MAP } from '@/lib/feature-icons'
 import { accentForeground, accentToRgba } from '@/lib/color'
 import ShowcaseGallery from '@/components/showcase-gallery'
+import SiteBackgroundLayer from '@/components/site-background'
 import dynamic from 'next/dynamic'
 
 const MusicPlayer = dynamic(() => import('@/components/music-player'), { ssr: false })
@@ -39,6 +40,7 @@ export default function HomeClient({
     showcaseTitle,
     showcaseSubtitle,
     showcase,
+    background,
     music,
     versions,
     featuredVersionId,
@@ -61,7 +63,9 @@ export default function HomeClient({
   } as CSSProperties
 
   return (
-    <main style={themeStyle} className="min-h-screen overflow-hidden bg-background text-foreground">
+    <main style={themeStyle} className="relative min-h-screen overflow-hidden text-foreground">
+      {/* ── Animated Background Layer ────────────────────────────── */}
+      <SiteBackgroundLayer bg={background} />
 
       {/* ── Navigation ──────────────────────────────────────────── */}
       <header className="sticky top-0 z-40 border-b border-border/40 bg-background/60 backdrop-blur-2xl">

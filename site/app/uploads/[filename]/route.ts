@@ -25,6 +25,13 @@ const CONTENT_TYPES: Record<string, string> = {
   '.mp3': 'audio/mpeg',
   '.ogg': 'audio/ogg',
   '.wav': 'audio/wav',
+  // Video — served inline so <video> tags render them directly
+  '.mp4': 'video/mp4',
+  '.webm': 'video/webm',
+  '.ogv': 'video/ogg',
+  '.mov': 'video/quicktime',
+  '.avi': 'video/x-msvideo',
+  '.mkv': 'video/x-matroska',
 }
 
 export async function GET(
@@ -44,7 +51,7 @@ export async function GET(
     const data = await fs.readFile(filePath)
     const ext = path.extname(filename).toLowerCase()
     const contentType = CONTENT_TYPES[ext] || 'application/octet-stream'
-    const isInline = contentType.startsWith('image/') || contentType.startsWith('audio/')
+    const isInline = contentType.startsWith('image/') || contentType.startsWith('audio/') || contentType.startsWith('video/')
     const disposition = isInline ? 'inline' : `attachment; filename="${filename}"`
 
     return new NextResponse(data, {

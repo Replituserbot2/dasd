@@ -54,6 +54,16 @@ export type BackgroundMusicConfig = {
   loop: boolean
 }
 
+// 'video' = mp4/webm uploads, 'image' = gif/webp/png animated files
+export type SiteBackground = {
+  enabled: boolean
+  type: 'video' | 'image'
+  url: string
+  opacity: number        // 0-100, background layer opacity
+  overlayOpacity: number // 0-100, dark overlay above background, under content
+  blur: number           // 0-20px gaussian blur on the background
+}
+
 export type SiteContent = {
   siteName: string
   heroTitle: string
@@ -65,6 +75,7 @@ export type SiteContent = {
   showcaseTitle: string
   showcaseSubtitle: string
   showcase: ShowcaseItem[]
+  background: SiteBackground
   music: BackgroundMusicConfig
   versions: Version[]
   featuredVersionId: string
@@ -92,6 +103,14 @@ export const defaultContent: SiteContent = {
   showcaseTitle: 'Client Interface & HUD',
   showcaseSubtitle: 'Experience the sleek, distraction-free interface engineered for maximum clarity and competitive edge.',
   showcase: [],
+  background: {
+    enabled: false,
+    type: 'video',
+    url: '',
+    opacity: 30,
+    overlayOpacity: 55,
+    blur: 0,
+  },
   music: {
     enabled: false,
     youtubeUrl: '',
@@ -164,6 +183,23 @@ function migrate(content: SiteContent): SiteContent {
     autoplay: content.music?.autoplay ?? defaultContent.music.autoplay,
     loop: content.music?.loop ?? defaultContent.music.loop,
   }
+  const background: SiteBackground = {
+    enabled: content.background?.enabled ?? defaultContent.background.enabled,
+    type: content.background?.type === 'image' ? 'image' : 'video',
+    url: content.background?.url ?? defaultContent.background.url,
+    opacity:
+      typeof content.background?.opacity === 'number'
+        ? content.background.opacity
+        : defaultContent.background.opacity,
+    overlayOpacity:
+      typeof content.background?.overlayOpacity === 'number'
+        ? content.background.overlayOpacity
+        : defaultContent.background.overlayOpacity,
+    blur:
+      typeof content.background?.blur === 'number'
+        ? content.background.blur
+        : defaultContent.background.blur,
+  }
   return {
     ...content,
     versions,
@@ -175,6 +211,7 @@ function migrate(content: SiteContent): SiteContent {
     showcaseTitle: content.showcaseTitle ?? defaultContent.showcaseTitle,
     showcaseSubtitle: content.showcaseSubtitle ?? defaultContent.showcaseSubtitle,
     showcase,
+    background,
     music,
     accentColor: content.accentColor || defaultContent.accentColor,
     footerTagline: content.footerTagline ?? defaultContent.footerTagline,

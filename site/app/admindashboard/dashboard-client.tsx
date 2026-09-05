@@ -5,6 +5,7 @@ import {
   AlertCircle,
   CheckCircle2,
   FileArchive,
+  Film,
   HelpCircle,
   Image as ImageIcon,
   LayoutGrid,
@@ -18,7 +19,7 @@ import {
   Users,
   X,
 } from 'lucide-react'
-import type { BackgroundMusicConfig, Faq, Feature, HeroBadge, ShowcaseItem, SiteContent, TeamMember, Version } from '@/lib/store'
+import type { BackgroundMusicConfig, Faq, Feature, HeroBadge, ShowcaseItem, SiteBackground, SiteContent, TeamMember, Version } from '@/lib/store'
 import GeneralSection from './sections/general-section'
 import BadgesSection from './sections/badges-section'
 import FeaturesSection from './sections/features-section'
@@ -28,14 +29,16 @@ import CreditsSection from './sections/credits-section'
 import FooterSection from './sections/footer-section'
 import ShowcaseSection from './sections/showcase-section'
 import MusicSection from './sections/music-section'
+import BackgroundSection from './sections/background-section'
 
-type TabKey = 'general' | 'badges' | 'features' | 'showcase' | 'music' | 'versions' | 'faq' | 'credits' | 'footer'
+type TabKey = 'general' | 'badges' | 'features' | 'showcase' | 'background' | 'music' | 'versions' | 'faq' | 'credits' | 'footer'
 
 const TABS: { key: TabKey; label: string; icon: ComponentType<{ size?: number; className?: string }> }[] = [
   { key: 'general', label: 'General', icon: Settings },
   { key: 'badges', label: 'Hero badges', icon: Tag },
   { key: 'features', label: 'Features', icon: LayoutGrid },
   { key: 'showcase', label: 'Showcase', icon: ImageIcon },
+  { key: 'background', label: 'Background', icon: Film },
   { key: 'music', label: 'Music player', icon: Music },
   { key: 'versions', label: 'Versions', icon: FileArchive },
   { key: 'faq', label: 'FAQ', icon: HelpCircle },
@@ -127,6 +130,10 @@ export default function DashboardClient({ initialContent }: { initialContent: Si
   // Music
   const updateMusic = (patch: Partial<BackgroundMusicConfig>) =>
     setContent((c) => ({ ...c, music: { ...c.music, ...patch } }))
+
+  // Background
+  const updateBackground = (patch: Partial<SiteBackground>) =>
+    setContent((c) => ({ ...c, background: { ...c.background, ...patch } }))
 
   // Versions
   const updateVersion = (id: string, patch: Partial<Version>) =>
@@ -448,6 +455,10 @@ export default function DashboardClient({ initialContent }: { initialContent: Si
 
             {activeTab === 'music' && (
               <MusicSection music={content.music} onUpdate={updateMusic} />
+            )}
+
+            {activeTab === 'background' && (
+              <BackgroundSection bg={content.background} onUpdate={updateBackground} />
             )}
 
             {activeTab === 'versions' && (

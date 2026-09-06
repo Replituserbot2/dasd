@@ -3,14 +3,14 @@
 import { useRef, useState } from 'react'
 import { AlertCircle, CheckCircle2, Film, Image as ImageIcon, Upload } from 'lucide-react'
 import type { SiteBackground } from '@/lib/store'
-import { Field, SectionCard, SmallInput, TextInput } from '../ui'
+import { Field, ProgressBar, SectionCard, Slider, TextInput, Toggle } from '../ui'
 
 const VIDEO_EXTS = ['.mp4', '.webm', '.ogv', '.mov']
 const IMAGE_EXTS = ['.gif', '.webp', '.png', '.jpg', '.jpeg', '.apng']
 
 function isVideoUrl(url: string) {
-  const ext = url.split('.').pop()?.toLowerCase() ?? ''
-  return VIDEO_EXTS.some((e) => e === '.' + ext)
+  const ext = '.' + (url.split('.').pop()?.toLowerCase() ?? '')
+  return VIDEO_EXTS.includes(ext)
 }
 
 export default function BackgroundSection({
@@ -34,7 +34,6 @@ export default function BackgroundSection({
     setUploadError('')
     setUploadSuccess('')
 
-    // Auto-detect type from extension
     const ext = '.' + (file.name.split('.').pop()?.toLowerCase() ?? '')
     const detectedType: 'video' | 'image' = VIDEO_EXTS.includes(ext) ? 'video' : 'image'
 
@@ -50,18 +49,15 @@ export default function BackgroundSection({
             const data = JSON.parse(xhr.responseText)
             if (xhr.status >= 200 && xhr.status < 300) resolve(data.url)
             else reject(new Error(data.error || 'Upload failed'))
-          } catch {
-            reject(new Error('Upload failed'))
-          }
+          } catch { reject(new Error('Upload failed')) }
         }
         xhr.onerror = () => reject(new Error('Network error'))
         const fd = new FormData()
         fd.append('file', file)
         xhr.send(fd)
       })
-
       onUpdate({ url, type: detectedType, enabled: true })
-      setUploadSuccess(`Uploaded successfully as ${detectedType === 'video' ? 'video' : 'image'} background`)
+      setUploadSuccess(`Uploaded as ${detectedType} background`)
     } catch (err) {
       setUploadError(err instanceof Error ? err.message : 'Upload failed')
     } finally {
@@ -69,48 +65,38 @@ export default function BackgroundSection({
     }
   }
 
-  const acceptStr = [...VIDEO_EXTS, ...IMAGE_EXTS].map((e) => `video/${e.slice(1)},image/${e.slice(1)}`).join(',') +
-    ',video/mp4,video/webm,image/gif,image/webp,image/png,image/jpeg'
+  const acceptStr = 'video/mp4,video/webm,video/quicktime,image/gif,image/webp,image/png,image/jpeg,image/apng'
 
   return (
     <div className="flex flex-col gap-6">
       <SectionCard
         icon={Film}
-        title="Animated Site Background"
-        description="Upload a looping video or animated image that fills the entire site background. The file scales to fit any screen size without distortion."
+        title="Animated site background"
+        description="A full-viewport looping video or animated image behind all page content. Scales perfectly at any screen size."
       >
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-5">
+          <Toggle
+            enabled={bg.enabled}
+            onChange={(v) => onUpdate({ enabled: v })}
+            label="Enable background"
+            description="Shows the animated background across the entire site"
+          />
 
-          {/* Enable Toggle */}
-          <div className="flex items-center justify-between rounded-xl border border-border/60 bg-background/50 p-4">
-            <div>
-              <p className="font-mono text-xs font-bold uppercase tracking-wider text-foreground">
-                Enable background
-              </p>
-              <p className="mt-0.5 text-xs text-muted-foreground">
-                Shows the animated background across the entire site
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => onUpdate({ enabled: !bg.enabled })}
-              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ${bg.enabled ? 'bg-primary' : 'bg-muted'}`}
-              role="switch"
-              aria-checked={bg.enabled}
-            >
-              <span className={`pointer-events-none inline-block size-5 transform rounded-full bg-white shadow-lg transition duration-200 ${bg.enabled ? 'translate-x-5' : 'translate-x-0'}`} />
-            </button>
-          </div>
-
-          {/* Upload Zone */}
+          {/* Upload zone */}
           <div className="flex flex-col gap-3 rounded-xl border border-dashed border-border/60 bg-background/30 p-5">
-            <p className="font-mono text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              Upload background file
-            </p>
-            <p className="text-xs text-muted-foreground">
-              <strong className="text-foreground">Video</strong> (MP4, WebM, MOV) — best quality, loops seamlessly, any length<br />
-              <strong className="text-foreground">Image</strong> (GIF, WebP, APNG, PNG, JPG) — animated GIFs and static images
-            </p>
+            <div className="flex items-start gap-3">
+              <div className="flex flex-col gap-1">
+                <p className="font-mono text-xs font-bold text-foreground">Upload background file</p>
+                <p className="text-xs text-muted-foreground">
+                  <strong className="text-foreground">Video</strong> (MP4, WebM, MOV) — best quality, loops seamlessly<br />
+                  <strong className="text-foreground">Image</strong> (GIF, WebP, APNG) — animated images
+                </p>
+              </div>
+              <div className="ml-auto flex gap-2 text-muted-foreground">
+                <Film size={20} />
+                <ImageIcon size={20} />
+              </div>
+            </div>
 
             <input
               ref={fileInputRef}
@@ -123,20 +109,13 @@ export default function BackgroundSection({
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading}
-              className="flex items-center justify-center gap-2 rounded-xl border border-border bg-card/60 px-4 py-3 font-mono text-xs font-bold uppercase tracking-wider text-foreground transition-all hover:border-primary/50 hover:bg-card hover:text-primary hover:shadow-[0_0_14px_var(--neon-soft)] disabled:opacity-50"
+              className="flex items-center justify-center gap-2 rounded-xl border border-border bg-card/60 px-4 py-3 font-mono text-xs font-bold uppercase tracking-wider text-foreground transition-all hover:border-primary/50 hover:bg-card hover:text-primary hover:shadow-[0_0_14px_rgba(239,45,67,0.15)] disabled:opacity-50 active:scale-95"
             >
               <Upload size={14} />
-              {uploading ? `Uploading... ${Math.round(uploadPct)}%` : 'Choose file to upload'}
+              {uploading ? `Uploading… ${Math.round(uploadPct)}%` : 'Choose file to upload'}
             </button>
 
-            {uploading && (
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-border">
-                <div
-                  className="h-full rounded-full bg-primary transition-all duration-300"
-                  style={{ width: `${uploadPct}%` }}
-                />
-              </div>
-            )}
+            {uploading && <ProgressBar pct={uploadPct} />}
 
             {uploadSuccess && (
               <p className="flex items-center gap-1.5 font-mono text-xs text-emerald-400">
@@ -150,30 +129,30 @@ export default function BackgroundSection({
             )}
           </div>
 
-          {/* Manual URL input */}
-          <Field label="Or paste a direct URL (must be from /uploads/...)">
+          {/* Manual URL */}
+          <Field label="Or paste a direct URL" hint="Must be from /uploads/... — e.g. /uploads/background.mp4">
             <TextInput
               value={bg.url}
               onChange={(e) => {
                 const url = e.target.value
-                const detectedType = isVideoUrl(url) ? 'video' : 'image'
-                onUpdate({ url, type: detectedType })
+                onUpdate({ url, type: isVideoUrl(url) ? 'video' : 'image' })
               }}
               placeholder="/uploads/your-background.mp4"
             />
           </Field>
 
           {/* Type selector */}
-          <Field label="Background type">
+          <div className="flex flex-col gap-2">
+            <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">Background type</span>
             <div className="flex gap-2">
               {(['video', 'image'] as const).map((t) => (
                 <button
                   key={t}
                   type="button"
                   onClick={() => onUpdate({ type: t })}
-                  className={`flex items-center gap-2 rounded-lg border px-3 py-2 font-mono text-xs font-bold uppercase tracking-wider transition-all ${
+                  className={`flex flex-1 items-center justify-center gap-2 rounded-xl border px-3 py-2.5 font-mono text-xs font-bold uppercase tracking-wider transition-all duration-200 ${
                     bg.type === t
-                      ? 'border-primary bg-primary/10 text-primary shadow-[0_0_10px_var(--neon-soft)]'
+                      ? 'border-primary/50 bg-primary/10 text-primary shadow-[0_0_10px_rgba(239,45,67,0.15)]'
                       : 'border-border/60 text-muted-foreground hover:border-border hover:text-foreground'
                   }`}
                 >
@@ -182,32 +161,25 @@ export default function BackgroundSection({
                 </button>
               ))}
             </div>
-            <p className="mt-1 text-[11px] text-muted-foreground">
-              {bg.type === 'video'
-                ? 'Renders a muted, looping, autoplay video. Use MP4 for best browser compatibility.'
-                : 'Renders an image tag — great for animated GIFs or WebP animations.'}
-            </p>
-          </Field>
+          </div>
         </div>
       </SectionCard>
 
-      {/* Preview + Controls */}
+      {/* Appearance controls + live preview */}
       {bg.url && (
-        <SectionCard
-          icon={Film}
-          title="Appearance Controls"
-          description="Adjust how the background looks. Changes are previewed live on the site after saving."
-        >
-          <div className="flex flex-col gap-5">
-
-            {/* Live preview */}
+        <SectionCard icon={Film} title="Appearance controls" description="Adjust how the background looks — changes preview live below.">
+          <div className="flex flex-col gap-6">
+            {/* Mini preview */}
             <div className="relative overflow-hidden rounded-xl border border-border/60 bg-black" style={{ aspectRatio: '16/5' }}>
               {bg.type === 'video' ? (
                 <video
                   key={bg.url}
                   autoPlay muted loop playsInline
                   className="absolute inset-0 size-full object-cover"
-                  style={{ opacity: bg.opacity / 100, filter: bg.blur > 0 ? `blur(${bg.blur}px)` : undefined }}
+                  style={{
+                    opacity: bg.opacity / 100,
+                    filter: bg.blur > 0 ? `blur(${bg.blur}px)` : undefined,
+                  }}
                 >
                   <source src={bg.url} />
                 </video>
@@ -217,61 +189,52 @@ export default function BackgroundSection({
                   src={bg.url}
                   alt=""
                   className="absolute inset-0 size-full object-cover"
-                  style={{ opacity: bg.opacity / 100, filter: bg.blur > 0 ? `blur(${bg.blur}px)` : undefined }}
+                  style={{
+                    opacity: bg.opacity / 100,
+                    filter: bg.blur > 0 ? `blur(${bg.blur}px)` : undefined,
+                  }}
                 />
               )}
-              <div
-                className="absolute inset-0"
-                style={{ backgroundColor: `rgba(0,0,0,${bg.overlayOpacity / 100})` }}
-              />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="rounded-full border border-white/20 bg-black/60 px-3 py-1 font-mono text-xs text-white/70 backdrop-blur-sm">
-                  Preview
+              <div className="absolute inset-0" style={{ backgroundColor: `rgba(0,0,0,${bg.overlayOpacity / 100})` }} />
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
+                <span className="rounded-full border border-white/20 bg-black/60 px-3 py-1 font-mono text-xs text-white/60 backdrop-blur-sm">
+                  Live preview
+                </span>
+                <span className="font-mono text-[10px] text-white/40">
+                  Opacity {bg.opacity}% · Overlay {bg.overlayOpacity}% · Blur {bg.blur}px
                 </span>
               </div>
             </div>
 
-            {/* Opacity slider */}
-            <Field label={`Background opacity — ${bg.opacity}%`}>
-              <div className="flex items-center gap-3">
-                <span className="font-mono text-xs text-muted-foreground w-6">0%</span>
-                <input
-                  type="range" min="0" max="100" value={bg.opacity}
-                  onChange={(e) => onUpdate({ opacity: Number(e.target.value) })}
-                  className="flex-1 h-2 rounded-lg appearance-none cursor-pointer bg-card border border-border/50 accent-primary"
-                />
-                <span className="font-mono text-xs text-muted-foreground w-10">100%</span>
-              </div>
-              <p className="mt-1 text-[11px] text-muted-foreground">How bright/visible the background is. Lower = more subtle.</p>
-            </Field>
+            <Slider
+              label="Background opacity"
+              value={bg.opacity}
+              min={0}
+              max={100}
+              unit="%"
+              hint="How visible the background is. Lower = more subtle and dark."
+              onChange={(v) => onUpdate({ opacity: v })}
+            />
 
-            {/* Overlay opacity slider */}
-            <Field label={`Dark overlay — ${bg.overlayOpacity}%`}>
-              <div className="flex items-center gap-3">
-                <span className="font-mono text-xs text-muted-foreground w-6">0%</span>
-                <input
-                  type="range" min="0" max="95" value={bg.overlayOpacity}
-                  onChange={(e) => onUpdate({ overlayOpacity: Number(e.target.value) })}
-                  className="flex-1 h-2 rounded-lg appearance-none cursor-pointer bg-card border border-border/50 accent-primary"
-                />
-                <span className="font-mono text-xs text-muted-foreground w-10">95%</span>
-              </div>
-              <p className="mt-1 text-[11px] text-muted-foreground">Dark layer above the background. Increase if text is hard to read.</p>
-            </Field>
+            <Slider
+              label="Dark overlay"
+              value={bg.overlayOpacity}
+              min={0}
+              max={95}
+              unit="%"
+              hint="A dark layer above the background. Increase if text is hard to read."
+              onChange={(v) => onUpdate({ overlayOpacity: v })}
+            />
 
-            {/* Blur slider */}
-            <Field label={`Blur — ${bg.blur}px`}>
-              <div className="flex items-center gap-3">
-                <span className="font-mono text-xs text-muted-foreground w-6">0</span>
-                <input
-                  type="range" min="0" max="20" value={bg.blur}
-                  onChange={(e) => onUpdate({ blur: Number(e.target.value) })}
-                  className="flex-1 h-2 rounded-lg appearance-none cursor-pointer bg-card border border-border/50 accent-primary"
-                />
-                <span className="font-mono text-xs text-muted-foreground w-10">20px</span>
-              </div>
-              <p className="mt-1 text-[11px] text-muted-foreground">Gaussian blur on the background — 0 = sharp, great for cinematic effect at 2-4px.</p>
-            </Field>
+            <Slider
+              label="Blur"
+              value={bg.blur}
+              min={0}
+              max={20}
+              unit="px"
+              hint="Gaussian blur — 0 = sharp, 2-4px = cinematic frosted look."
+              onChange={(v) => onUpdate({ blur: v })}
+            />
           </div>
         </SectionCard>
       )}

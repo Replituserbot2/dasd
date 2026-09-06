@@ -305,55 +305,78 @@ export default function DashboardClient({ initialContent }: { initialContent: Si
             ? 'Save changes'
             : 'Saved'
 
+  const NAV_GROUPS = [
+    { label: 'Content', tabs: ['general', 'badges', 'features'] as TabKey[] },
+    { label: 'Media', tabs: ['showcase', 'background', 'music'] as TabKey[] },
+    { label: 'Downloads', tabs: ['versions'] as TabKey[] },
+    { label: 'Other', tabs: ['faq', 'credits', 'footer'] as TabKey[] },
+  ]
+
   const navButtonClass = (key: TabKey) =>
-    `flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider transition-colors ${
+    `group flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider transition-all duration-200 ${
       activeTab === key
-        ? 'bg-primary/12 text-primary shadow-[inset_0_0_0_1px_var(--neon)]'
-        : 'text-muted-foreground hover:bg-card hover:text-foreground'
+        ? 'bg-primary/15 text-primary shadow-[inset_0_0_0_1px_rgba(239,45,67,0.4)]'
+        : 'text-muted-foreground hover:bg-card/80 hover:text-foreground'
     }`
 
   const sidebarContent = (
     <>
-      <div className="flex items-center gap-2.5 px-1 pb-6">
-        <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-[0_0_20px_var(--neon)]">
-          <LockKeyhole size={16} />
+      <div className="flex items-center gap-3 px-1 pb-7">
+        <span className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-[0_0_24px_rgba(239,45,67,0.5)]">
+          <LockKeyhole size={15} />
         </span>
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary">Control center</p>
-          <h1 className="font-mono text-base font-bold">Site Editor</h1>
+          <p className="font-mono text-[9px] uppercase tracking-[0.25em] text-primary">Admin panel</p>
+          <h1 className="font-mono text-sm font-black uppercase tracking-widest">Site Editor</h1>
         </div>
       </div>
 
-      <nav className="flex flex-1 flex-col gap-1">
-        {TABS.map(({ key, label, icon: Icon }) => (
-          <button
-            key={key}
-            onClick={() => {
-              setActiveTab(key)
-              setMobileNavOpen(false)
-            }}
-            className={navButtonClass(key)}
-          >
-            <Icon size={14} />
-            {label}
-          </button>
+      <nav className="flex flex-1 flex-col gap-5">
+        {NAV_GROUPS.map((group) => (
+          <div key={group.label} className="flex flex-col gap-0.5">
+            <p className="mb-1.5 px-3 font-mono text-[9px] uppercase tracking-[0.25em] text-muted-foreground/50">
+              {group.label}
+            </p>
+            {group.tabs.map((key) => {
+              const tab = TABS.find((t) => t.key === key)!
+              const Icon = tab.icon
+              return (
+                <button
+                  key={key}
+                  onClick={() => { setActiveTab(key); setMobileNavOpen(false) }}
+                  className={navButtonClass(key)}
+                >
+                  <span className={`flex size-5 shrink-0 items-center justify-center rounded-md transition-all duration-200 ${
+                    activeTab === key ? 'bg-primary/20 text-primary' : 'text-muted-foreground group-hover:text-foreground'
+                  }`}>
+                    <Icon size={12} />
+                  </span>
+                  {tab.label}
+                  {activeTab === key && (
+                    <span className="ml-auto size-1.5 rounded-full bg-primary animate-pulse" />
+                  )}
+                </button>
+              )
+            })}
+          </div>
         ))}
       </nav>
 
-      <div className="mt-6 flex flex-col gap-1 border-t border-border/40 pt-4">
+      <div className="mt-4 flex flex-col gap-1 border-t border-border/40 pt-4">
         <a
           href="/"
           target="_blank"
           rel="noreferrer"
-          className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 font-mono text-xs uppercase tracking-wider text-muted-foreground transition-colors hover:bg-card hover:text-primary"
+          className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 font-mono text-xs uppercase tracking-wider text-muted-foreground transition-all duration-200 hover:bg-primary/10 hover:text-primary"
         >
-          ← View live site
+          <span className="flex size-5 items-center justify-center text-xs">↗</span>
+          Preview live site
         </a>
         <button
           onClick={logout}
-          className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 font-mono text-xs uppercase tracking-wider text-muted-foreground transition-colors hover:bg-card hover:text-primary"
+          className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 font-mono text-xs uppercase tracking-wider text-muted-foreground transition-all duration-200 hover:bg-red-500/10 hover:text-red-400"
         >
-          <LogOut size={14} /> Log out
+          <LogOut size={13} className="shrink-0" /> Log out
         </button>
       </div>
     </>
@@ -361,23 +384,27 @@ export default function DashboardClient({ initialContent }: { initialContent: Si
 
   return (
     <main className="min-h-screen bg-background text-foreground">
-      <div className="mx-auto flex min-h-screen max-w-[1400px]">
+      {/* Outer glow at very top */}
+      <div className="pointer-events-none fixed inset-x-0 top-0 z-50 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+
+      <div className="mx-auto flex min-h-screen max-w-[1440px]">
         {/* Desktop sidebar */}
-        <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-border/40 bg-card/30 p-5 md:flex">
+        <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col overflow-y-auto border-r border-border/40 bg-card/20 p-5 backdrop-blur-sm md:flex">
+          <div className="absolute inset-y-0 right-0 w-px bg-gradient-to-b from-transparent via-primary/20 to-transparent" />
           {sidebarContent}
         </aside>
 
-        {/* Mobile sidebar drawer */}
+        {/* Mobile drawer */}
         {mobileNavOpen && (
           <div className="fixed inset-0 z-50 flex md:hidden">
-            <div className="absolute inset-0 bg-black/60" onClick={() => setMobileNavOpen(false)} />
-            <aside className="relative flex h-full w-72 flex-col border-r border-border/40 bg-card p-5">
+            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setMobileNavOpen(false)} />
+            <aside className="relative flex h-full w-72 flex-col overflow-y-auto border-r border-border/40 bg-card p-5">
               <button
                 onClick={() => setMobileNavOpen(false)}
-                className="absolute right-4 top-5 text-muted-foreground hover:text-primary"
+                className="absolute right-4 top-5 flex size-8 items-center justify-center rounded-lg border border-border/50 text-muted-foreground transition-colors hover:text-primary"
                 aria-label="Close menu"
               >
-                <X size={18} />
+                <X size={16} />
               </button>
               {sidebarContent}
             </aside>
@@ -385,37 +412,47 @@ export default function DashboardClient({ initialContent }: { initialContent: Si
         )}
 
         <div className="flex min-w-0 flex-1 flex-col">
+          {/* Top bar */}
           <div className="sticky top-0 z-30 flex items-center justify-between gap-4 border-b border-border/40 bg-background/80 px-5 py-4 backdrop-blur-xl sm:px-8">
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setMobileNavOpen(true)}
-                className="flex size-8 items-center justify-center rounded-md border border-border/50 text-muted-foreground hover:text-primary md:hidden"
+                className="flex size-8 items-center justify-center rounded-xl border border-border/50 text-muted-foreground transition-all hover:border-primary/40 hover:text-primary md:hidden"
                 aria-label="Open menu"
               >
-                <Menu size={16} />
+                <Menu size={15} />
               </button>
               <div>
-                <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary">{activeMeta.label}</p>
-                <h2 className="font-mono text-sm font-bold text-foreground sm:text-base">Editing site content</h2>
+                <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-primary">{activeMeta.label}</p>
+                <h2 className="font-mono text-sm font-bold text-foreground sm:text-base">
+                  Editing site content
+                  {isDirty && (
+                    <span className="ml-2 inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest text-amber-400">
+                      <span className="size-1 rounded-full bg-amber-400 animate-pulse" />
+                      Unsaved
+                    </span>
+                  )}
+                </h2>
               </div>
             </div>
 
             <button
               onClick={save}
               disabled={status === 'saving' || !isDirty}
-              className="flex shrink-0 items-center gap-2 rounded-lg bg-primary px-4 py-2.5 font-mono text-xs font-bold uppercase tracking-wider text-primary-foreground shadow-[0_0_16px_var(--neon)] transition-all hover:shadow-[0_0_24px_var(--neon)] disabled:cursor-default disabled:opacity-50 disabled:shadow-none"
+              className="group relative flex shrink-0 items-center gap-2 overflow-hidden rounded-xl bg-primary px-5 py-2.5 font-mono text-xs font-bold uppercase tracking-wider text-primary-foreground shadow-[0_0_20px_rgba(239,45,67,0.4)] transition-all duration-300 hover:shadow-[0_0_32px_rgba(239,45,67,0.6)] disabled:cursor-default disabled:opacity-50 disabled:shadow-none active:scale-95"
             >
+              <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/15 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
               {status === 'saved' ? <CheckCircle2 size={14} /> : status === 'error' ? <AlertCircle size={14} /> : null}
               {saveLabel}
-              {isDirty && status === 'idle' && <span className="size-1.5 rounded-full bg-primary-foreground" />}
             </button>
           </div>
 
+          {/* Content area */}
           <div className="mx-auto w-full max-w-3xl flex-1 px-5 py-8 sm:px-8">
             {errorMsg && (
-              <p className="mb-6 flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 font-mono text-xs text-red-400">
-                <AlertCircle size={14} /> {errorMsg}
-              </p>
+              <div className="mb-6 flex items-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 font-mono text-xs text-red-400">
+                <AlertCircle size={14} className="shrink-0" /> {errorMsg}
+              </div>
             )}
 
             {activeTab === 'general' && <GeneralSection content={content} update={update} />}

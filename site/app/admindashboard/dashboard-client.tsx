@@ -537,11 +537,7 @@ export default function DashboardClient({ initialContent }: { initialContent: Si
             )}
 
             {activeTab === 'footer' && (
-              <FooterSection
-                siteName={content.siteName}
-                footerTagline={content.footerTagline}
-                onUpdate={(value) => update('footerTagline', value)}
-              />
+              <FooterSection content={content} update={update} />
             )}
           </div>
         </div>

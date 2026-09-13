@@ -64,12 +64,25 @@ export type SiteBackground = {
   blur: number           // 0-20px gaussian blur on the background
 }
 
+export type FooterLink = {
+  id: string
+  label: string
+  url: string
+}
+
+export type FooterColumn = {
+  id: string
+  heading: string
+  links: FooterLink[]
+}
+
 export type SiteContent = {
   siteName: string
   heroTitle: string
   heroSubtitle: string
   downloadName: string
   accentColor: string
+  logoUrl: string          // custom logo image shown in nav + footer
   heroBadges: HeroBadge[]
   features: Feature[]
   showcaseTitle: string
@@ -81,7 +94,11 @@ export type SiteContent = {
   featuredVersionId: string
   faqs: Faq[]
   team: TeamMember[]
-  footerTagline: string
+  // Footer
+  footerTagline: string      // legacy — kept for migration
+  footerDescription: string  // paragraph below logo
+  footerColumns: FooterColumn[]
+  footerCopyright: string
 }
 
 export const defaultContent: SiteContent = {
@@ -90,6 +107,7 @@ export const defaultContent: SiteContent = {
   heroSubtitle: 'Dominate with the sharpest HUD overlay ever created.',
   downloadName: 'Stratoukos Client v2.4.0',
   accentColor: '#ef2d43',
+  logoUrl: '/logo.jpg',
   heroBadges: [
     { id: 'b1', text: 'Optimized HUD' },
     { id: 'b2', text: 'PvP ready' },
@@ -139,10 +157,40 @@ export const defaultContent: SiteContent = {
     { id: 't3', name: 'Special Thanks', role: 'Everyone making Stratoukos Client possible' },
   ],
   footerTagline: 'Built for competitive excellence.',
+  footerDescription: 'The most advanced HUD overlay for competitive Minecraft. Zero distractions, maximum performance.',
+  footerColumns: [
+    {
+      id: 'fc1',
+      heading: 'Product',
+      links: [
+        { id: 'fl1', label: 'Features', url: '#features' },
+        { id: 'fl2', label: 'Showcase', url: '#showcase' },
+        { id: 'fl3', label: 'Downloads', url: '#download' },
+      ],
+    },
+    {
+      id: 'fc2',
+      heading: 'Support',
+      links: [
+        { id: 'fl4', label: 'FAQ', url: '#faq' },
+        { id: 'fl5', label: 'Discord', url: '#' },
+        { id: 'fl6', label: 'Contact', url: '#' },
+      ],
+    },
+    {
+      id: 'fc3',
+      heading: 'Connect',
+      links: [
+        { id: 'fl7', label: 'YouTube', url: '#' },
+        { id: 'fl8', label: 'Twitter / X', url: '#' },
+        { id: 'fl9', label: 'GitHub', url: '#' },
+      ],
+    },
+  ],
+  footerCopyright: `© ${new Date().getFullYear()} Stratoukos Client. All rights reserved.`,
 }
 
-// Fills in ids/defaults for content saved before newer fields existed, and
-// makes sure featuredVersionId always points at a real entry.
+// Fills in ids/defaults for content saved before newer fields existed
 function migrate(content: SiteContent): SiteContent {
   const versions = (content.versions ?? []).map((v, i) => ({
     ...v,
@@ -200,6 +248,17 @@ function migrate(content: SiteContent): SiteContent {
         ? content.background.blur
         : defaultContent.background.blur,
   }
+  // Migrate footer columns — give IDs if missing
+  const footerColumns: FooterColumn[] = (content.footerColumns ?? defaultContent.footerColumns).map(
+    (col, ci) => ({
+      ...col,
+      id: col.id || `fc-${ci}`,
+      links: (col.links ?? []).map((lnk, li) => ({
+        ...lnk,
+        id: lnk.id || `fl-${ci}-${li}`,
+      })),
+    }),
+  )
   return {
     ...content,
     versions,
@@ -214,7 +273,11 @@ function migrate(content: SiteContent): SiteContent {
     background,
     music,
     accentColor: content.accentColor || defaultContent.accentColor,
+    logoUrl: content.logoUrl ?? defaultContent.logoUrl,
     footerTagline: content.footerTagline ?? defaultContent.footerTagline,
+    footerDescription: content.footerDescription ?? defaultContent.footerDescription,
+    footerColumns,
+    footerCopyright: content.footerCopyright ?? defaultContent.footerCopyright,
   }
 }
 

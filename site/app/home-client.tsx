@@ -35,6 +35,7 @@ export default function HomeClient({
     heroSubtitle,
     downloadName,
     accentColor,
+    logoUrl,
     heroBadges,
     features,
     showcaseTitle,
@@ -46,7 +47,9 @@ export default function HomeClient({
     featuredVersionId,
     faqs,
     team,
-    footerTagline,
+    footerDescription,
+    footerColumns,
+    footerCopyright,
   } = content
 
   const featured = versions.find((v) => v.id === featuredVersionId) ?? versions[0]
@@ -73,9 +76,18 @@ export default function HomeClient({
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 lg:px-8">
           <a href="#top" className="group flex items-center gap-2.5">
-            <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-[0_0_20px_var(--neon)] transition-all duration-300 group-hover:shadow-[0_0_32px_var(--neon-hard)] group-hover:scale-110">
-              <Sparkles size={16} />
-            </span>
+            {logoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={logoUrl}
+                alt={siteName}
+                className="size-9 rounded-lg object-cover shadow-[0_0_16px_var(--neon)] transition-all duration-300 group-hover:shadow-[0_0_28px_var(--neon-hard)] group-hover:scale-110"
+              />
+            ) : (
+              <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-[0_0_20px_var(--neon)] transition-all duration-300 group-hover:shadow-[0_0_32px_var(--neon-hard)] group-hover:scale-110">
+                <Sparkles size={16} />
+              </span>
+            )}
             <span className="font-mono text-sm font-bold uppercase tracking-widest text-foreground transition-colors group-hover:text-primary">
               {siteName}
             </span>
@@ -451,11 +463,70 @@ export default function HomeClient({
       )}
 
       {/* ── Footer ───────────────────────────────────────────────── */}
-      <footer className="relative border-t border-border/40 bg-card/20 px-5 py-8 lg:px-8">
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-        <div className="mx-auto flex max-w-7xl flex-col gap-3 font-mono text-xs uppercase tracking-wider text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-          <span className="transition-colors hover:text-primary">© {new Date().getFullYear()} {siteName}</span>
-          <span>{footerTagline}</span>
+      <footer id="footer" className="relative border-t border-border/30 bg-card/10 backdrop-blur-sm">
+        {/* top accent glow */}
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+        <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-primary/4 to-transparent pointer-events-none" />
+
+        {/* Main footer grid */}
+        <div className="mx-auto max-w-7xl px-5 py-16 lg:px-8">
+          <div className="grid grid-cols-1 gap-12 md:grid-cols-[1fr_repeat(3,auto)] lg:gap-16">
+
+            {/* Left — logo + description */}
+            <div className="flex flex-col gap-5 max-w-xs">
+              <a href="#top" className="group flex items-center gap-3">
+                {logoUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={logoUrl}
+                    alt={siteName}
+                    className="size-10 rounded-xl object-cover shadow-[0_0_20px_var(--neon)] transition-all duration-300 group-hover:shadow-[0_0_32px_var(--neon-hard)]"
+                  />
+                ) : (
+                  <span className="flex size-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-[0_0_20px_var(--neon)]">
+                    <Sparkles size={18} />
+                  </span>
+                )}
+                <span className="font-mono text-lg font-black uppercase tracking-widest text-foreground transition-colors group-hover:text-primary">
+                  {siteName}
+                </span>
+              </a>
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                {footerDescription}
+              </p>
+              {/* accent bar */}
+              <div className="h-px w-16 bg-gradient-to-r from-primary to-transparent" />
+            </div>
+
+            {/* Link columns */}
+            {(footerColumns ?? []).map((col) => (
+              <div key={col.id} className="flex flex-col gap-4">
+                <h4 className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-foreground">
+                  {col.heading}
+                </h4>
+                <ul className="flex flex-col gap-2.5">
+                  {col.links.map((link) => (
+                    <li key={link.id}>
+                      <a
+                        href={link.url || '#'}
+                        className="text-sm text-muted-foreground transition-all duration-200 hover:text-primary hover:translate-x-0.5 inline-block"
+                      >
+                        {link.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Bottom bar */}
+        <div className="border-t border-border/30">
+          <div className="mx-auto flex max-w-7xl flex-col gap-2 px-5 py-5 font-mono text-[11px] uppercase tracking-wider text-muted-foreground/60 sm:flex-row sm:items-center sm:justify-between lg:px-8">
+            <span>{footerCopyright}</span>
+            <span className="text-muted-foreground/40">All rights reserved.</span>
+          </div>
         </div>
       </footer>
 

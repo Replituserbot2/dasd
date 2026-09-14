@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useRef, useState, type ComponentType } from 'react'
+import { useMemo, useRef, useState, type ComponentType, type CSSProperties } from 'react'
 import {
   AlertCircle,
   CheckCircle2,
@@ -20,6 +20,7 @@ import {
   X,
 } from 'lucide-react'
 import type { BackgroundMusicConfig, Faq, Feature, HeroBadge, ShowcaseItem, SiteBackground, SiteContent, TeamMember, Version } from '@/lib/store'
+import { accentForeground, accentToRgba } from '@/lib/color'
 import GeneralSection from './sections/general-section'
 import BadgesSection from './sections/badges-section'
 import FeaturesSection from './sections/features-section'
@@ -30,6 +31,8 @@ import FooterSection from './sections/footer-section'
 import ShowcaseSection from './sections/showcase-section'
 import MusicSection from './sections/music-section'
 import BackgroundSection from './sections/background-section'
+import SiteLogo from '@/components/site-logo'
+import SiteBackgroundLayer from '@/components/site-background'
 
 type TabKey = 'general' | 'badges' | 'features' | 'showcase' | 'background' | 'music' | 'versions' | 'faq' | 'credits' | 'footer'
 
@@ -68,6 +71,15 @@ export default function DashboardClient({ initialContent }: { initialContent: Si
   const showcaseInputs = useRef<Record<string, HTMLInputElement | null>>({})
 
   const isDirty = useMemo(() => JSON.stringify(content) !== savedSnapshot, [content, savedSnapshot])
+
+  const themeStyle = {
+    '--primary': content.accentColor,
+    '--ring': content.accentColor,
+    '--primary-foreground': accentForeground(content.accentColor),
+    '--neon': accentToRgba(content.accentColor, 0.18),
+    '--neon-soft': accentToRgba(content.accentColor, 0.06),
+    '--neon-hard': accentToRgba(content.accentColor, 0.32),
+  } as CSSProperties
 
   const update = <K extends keyof SiteContent>(key: K, value: SiteContent[K]) =>
     setContent((c) => ({ ...c, [key]: value }))
@@ -322,12 +334,17 @@ export default function DashboardClient({ initialContent }: { initialContent: Si
   const sidebarContent = (
     <>
       <div className="flex items-center gap-3 px-1 pb-7">
-        <span className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-[0_0_24px_rgba(239,45,67,0.5)]">
-          <LockKeyhole size={15} />
-        </span>
+        <SiteLogo
+          type={content.logoType}
+          logoUrl={content.logoUrl}
+          logoTint={content.logoTint}
+          logoGlow={content.logoGlow}
+          siteName={content.siteName}
+          className="size-9"
+        />
         <div>
           <p className="font-mono text-[9px] uppercase tracking-[0.25em] text-primary">Admin panel</p>
-          <h1 className="font-mono text-sm font-black uppercase tracking-widest">Site Editor</h1>
+          <h1 className="font-mono text-sm font-black uppercase tracking-widest">{content.siteName || 'Site Editor'}</h1>
         </div>
       </div>
 
@@ -383,13 +400,16 @@ export default function DashboardClient({ initialContent }: { initialContent: Si
   )
 
   return (
-    <main className="min-h-screen bg-background text-foreground">
+    <main style={themeStyle} className="relative min-h-screen text-foreground">
+      {/* Site dynamic background layer matching live site */}
+      <SiteBackgroundLayer bg={content.background} />
+
       {/* Outer glow at very top */}
       <div className="pointer-events-none fixed inset-x-0 top-0 z-50 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
 
       <div className="mx-auto flex min-h-screen max-w-[1440px]">
         {/* Desktop sidebar */}
-        <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col overflow-y-auto border-r border-border/40 bg-card/20 p-5 backdrop-blur-sm md:flex">
+        <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col overflow-y-auto border-r border-border/40 bg-card/20 p-5 backdrop-blur-md md:flex">
           <div className="absolute inset-y-0 right-0 w-px bg-gradient-to-b from-transparent via-primary/20 to-transparent" />
           {sidebarContent}
         </aside>
@@ -439,7 +459,7 @@ export default function DashboardClient({ initialContent }: { initialContent: Si
             <button
               onClick={save}
               disabled={status === 'saving' || !isDirty}
-              className="group relative flex shrink-0 items-center gap-2 overflow-hidden rounded-xl bg-primary px-5 py-2.5 font-mono text-xs font-bold uppercase tracking-wider text-primary-foreground shadow-[0_0_20px_rgba(239,45,67,0.4)] transition-all duration-300 hover:shadow-[0_0_32px_rgba(239,45,67,0.6)] disabled:cursor-default disabled:opacity-50 disabled:shadow-none active:scale-95"
+              className="btn-highlight group relative flex shrink-0 items-center gap-2 overflow-hidden rounded-xl bg-primary px-5 py-2.5 font-mono text-xs font-bold uppercase tracking-wider text-primary-foreground shadow-[0_0_20px_var(--neon)] transition-all duration-300 hover:shadow-[0_0_32px_var(--neon-hard)] disabled:cursor-default disabled:opacity-50 disabled:shadow-none active:scale-95"
             >
               <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/15 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
               {status === 'saved' ? <CheckCircle2 size={14} /> : status === 'error' ? <AlertCircle size={14} /> : null}

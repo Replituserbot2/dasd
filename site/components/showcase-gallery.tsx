@@ -10,17 +10,20 @@ import {
 } from 'lucide-react'
 import type { ShowcaseItem } from '@/lib/store'
 import { accentToRgba } from '@/lib/color'
+import ScrollReveal from '@/components/scroll-reveal'
 
 export default function ShowcaseGallery({
   items,
   title = 'Client Interface & HUD',
   subtitle = 'Experience the sleek, distraction-free interface engineered for maximum clarity and competitive edge.',
   accentColor = '#ef2d43',
+  titleFontClass = 'font-minecraft',
 }: {
   items: ShowcaseItem[]
   title?: string
   subtitle?: string
   accentColor?: string
+  titleFontClass?: string
 }) {
   const [activeIndex, setActiveIndex] = useState(0)
   const [lightboxOpen, setLightboxOpen] = useState(false)
@@ -73,14 +76,14 @@ export default function ShowcaseGallery({
 
       <div className="mx-auto max-w-7xl">
         {/* ── Section Header ── */}
-        <div className="mb-12 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+        <ScrollReveal className="mb-12 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
           <div>
             <div className="mb-2 inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.2em] text-primary">
               <Sparkles size={13} />
               <span>Showcase &amp; Interface</span>
               <span className="size-1 rounded-full bg-primary animate-pulse" />
             </div>
-            <h2 className="max-w-3xl text-balance font-mono text-4xl font-bold tracking-tight sm:text-5xl">
+            <h2 className={`${titleFontClass} max-w-3xl text-balance text-4xl font-bold tracking-tight sm:text-5xl`}>
               {title}
             </h2>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
@@ -109,7 +112,7 @@ export default function ShowcaseGallery({
               </button>
             </div>
           )}
-        </div>
+        </ScrollReveal>
 
         {/* ── Main Stage ── */}
         <div

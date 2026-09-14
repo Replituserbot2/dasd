@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Orbitron:wght@700;900&family=VT323&family=Space+Grotesk:wght@600;700&display=swap');
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
@@ -48,9 +49,9 @@
   --input: oklch(1 0 0 / 14%);
   --ring: oklch(0.62 0.24 24);
   --radius: 0.7rem;
-  --neon:      rgba(239, 45, 67, 0.42);
-  --neon-soft: rgba(239, 45, 67, 0.15);
-  --neon-hard: rgba(239, 45, 67, 0.70);
+  --neon:      rgba(239, 45, 67, 0.18);
+  --neon-soft: rgba(239, 45, 67, 0.06);
+  --neon-hard: rgba(239, 45, 67, 0.32);
 }
 
 * { @apply border-border outline-ring/50; }
@@ -67,7 +68,7 @@ body { @apply text-foreground font-sans; background: transparent; }
 
 /* Scroll-reveal slide-up */
 @keyframes slide-up {
-  from { opacity: 0; transform: translateY(28px); }
+  from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
@@ -76,6 +77,27 @@ body { @apply text-foreground font-sans; background: transparent; }
   from { background-position: -200% center; }
   to   { background-position: 200% center; }
 }
+
+/* Gentle floating motion for flow */
+@keyframes gentle-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+}
+
+/* Subtle, refined breathing glow for logo */
+@keyframes logo-ambient-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 4px var(--neon));
+    transform: scale(1);
+  }
+  50% {
+    filter: drop-shadow(0 0 8px var(--neon-hard));
+    transform: scale(1.02);
+  }
+}
+
+.animate-float     { animation: gentle-float 6s ease-in-out infinite; }
+.animate-logo-glow { animation: logo-ambient-glow 4s ease-in-out infinite; }
 
 .animate-in   { animation-fill-mode: both; }
 .fade-in      { animation-name: fade-in; }
@@ -91,6 +113,75 @@ body { @apply text-foreground font-sans; background: transparent; }
 input[type='range']::-webkit-slider-thumb { accent-color: var(--primary); }
 input[type='range']::-moz-range-thumb     { background: var(--primary); border: none; }
 
+/* Font families */
+.font-minecraft {
+  font-family: 'Silkscreen', 'VT323', monospace !important;
+  letter-spacing: 0.035em;
+  text-rendering: geometricPrecision;
+}
+
+.font-orbitron {
+  font-family: 'Orbitron', sans-serif !important;
+  letter-spacing: 0.06em;
+}
+
+.font-modern {
+  font-family: var(--font-sans) !important;
+}
+
+.font-mono {
+  font-family: 'Space Grotesk', var(--font-mono), monospace !important;
+}
+
+/* Smooth text pop-up / fade-in animation */
+@keyframes text-popup {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.97);
+    filter: blur(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+.animate-pop-in {
+  animation: text-popup 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.delay-150 { animation-delay: 150ms; }
+.delay-250 { animation-delay: 250ms; }
+.delay-350 { animation-delay: 350ms; }
+.delay-500 { animation-delay: 500ms; }
+
+/* Interactive button hover highlight & luminous sheen */
+.btn-highlight {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-highlight::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 20%, rgba(255, 255, 255, 0.28) 50%, transparent 80%);
+  transform: translateX(-100%);
+  transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+.btn-highlight:hover::after {
+  transform: translateX(100%);
+}
+.btn-highlight:hover {
+  box-shadow: 0 4px 20px var(--neon), 0 0 0 1px rgba(255, 255, 255, 0.16) inset;
+  transform: translateY(-2px);
+}
+.btn-highlight:active {
+  transform: translateY(0) scale(0.97);
+}
+
 /* Offset anchor targets so sticky header doesn't cover them */
 section[id], footer[id] { scroll-margin-top: 80px; }
 
@@ -100,4 +191,4 @@ section[id], footer[id] { scroll-margin-top: 80px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(239,45,67,0.55); }
 
 /* Global transition default for interactive elements */
-a, button { transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); }
+a, button { transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1); }

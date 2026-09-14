@@ -76,13 +76,20 @@ export type FooterColumn = {
   links: FooterLink[]
 }
 
+export type LogoType = 'dynamic-s' | 'dynamic-demon' | 'custom'
+export type TitleFont = 'minecraft' | 'modern' | 'orbitron' | 'mono'
+
 export type SiteContent = {
   siteName: string
   heroTitle: string
   heroSubtitle: string
   downloadName: string
   accentColor: string
-  logoUrl: string          // custom logo image shown in nav + footer
+  titleFont: TitleFont     // 'minecraft' | 'modern' | 'orbitron' | 'mono'
+  logoType: LogoType       // 'dynamic-s' | 'dynamic-demon' | 'custom'
+  logoUrl: string          // custom logo image shown in nav + footer when logoType === 'custom'
+  logoTint: boolean        // whether to tint custom logo with site accent color
+  logoGlow: boolean        // ambient breathing glow that syncs with theme & video
   heroBadges: HeroBadge[]
   features: Feature[]
   showcaseTitle: string
@@ -107,7 +114,11 @@ export const defaultContent: SiteContent = {
   heroSubtitle: 'Dominate with the sharpest HUD overlay ever created.',
   downloadName: 'Stratoukos Client v2.4.0',
   accentColor: '#ef2d43',
+  titleFont: 'minecraft',
+  logoType: 'dynamic-s',
   logoUrl: '/logo.jpg',
+  logoTint: true,
+  logoGlow: true,
   heroBadges: [
     { id: 'b1', text: 'Optimized HUD' },
     { id: 'b2', text: 'PvP ready' },
@@ -273,7 +284,11 @@ function migrate(content: SiteContent): SiteContent {
     background,
     music,
     accentColor: content.accentColor || defaultContent.accentColor,
+    titleFont: content.titleFont ?? defaultContent.titleFont,
+    logoType: content.logoType ?? defaultContent.logoType,
     logoUrl: content.logoUrl ?? defaultContent.logoUrl,
+    logoTint: typeof content.logoTint === 'boolean' ? content.logoTint : defaultContent.logoTint,
+    logoGlow: typeof content.logoGlow === 'boolean' ? content.logoGlow : defaultContent.logoGlow,
     footerTagline: content.footerTagline ?? defaultContent.footerTagline,
     footerDescription: content.footerDescription ?? defaultContent.footerDescription,
     footerColumns,

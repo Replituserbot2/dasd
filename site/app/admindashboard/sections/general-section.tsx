@@ -1,9 +1,16 @@
 'use client'
 
-import { Settings, Palette } from 'lucide-react'
-import type { SiteContent } from '@/lib/store'
+import { Settings, Palette, Type } from 'lucide-react'
+import type { SiteContent, TitleFont } from '@/lib/store'
 import { accentForeground, accentToRgba } from '@/lib/color'
 import { Field, SectionCard, TextArea, TextInput } from '../ui'
+
+const FONT_OPTIONS: { value: TitleFont; label: string; preview: string; cssClass: string }[] = [
+  { value: 'minecraft', label: 'Minecraft', preview: 'Aa', cssClass: 'font-minecraft' },
+  { value: 'orbitron', label: 'Orbitron', preview: 'Aa', cssClass: 'font-orbitron' },
+  { value: 'modern', label: 'Modern', preview: 'Aa', cssClass: 'font-modern' },
+  { value: 'mono', label: 'Mono', preview: 'Aa', cssClass: 'font-mono' },
+]
 
 const PRESETS = [
   '#ef2d43', '#f97316', '#eab308', '#22c55e',
@@ -86,6 +93,62 @@ export default function GeneralSection({
               }}
             />
           ))}
+        </div>
+      </SectionCard>
+
+      <SectionCard
+        icon={Type}
+        title="Title & heading font"
+        description="Choose the font family used for major titles and headings across the website (Minecraft, Orbitron, Modern, Mono)."
+      >
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {FONT_OPTIONS.map((f) => {
+            const active = (content.titleFont ?? 'minecraft') === f.value
+            return (
+              <button
+                key={f.value}
+                type="button"
+                onClick={() => update('titleFont', f.value)}
+                className={`flex flex-col items-center justify-center gap-2 rounded-xl border p-4 text-center transition-all duration-200 ${
+                  active
+                    ? 'border-primary bg-primary/10 shadow-[0_0_15px_var(--neon)]'
+                    : 'border-border/60 bg-card/40 hover:border-border hover:bg-card/70'
+                }`}
+              >
+                <span className={`text-2xl font-bold ${f.cssClass} ${active ? 'text-primary' : 'text-foreground'}`}>
+                  {f.preview}
+                </span>
+                <div className="flex flex-col items-center">
+                  <span className="font-mono text-xs font-semibold uppercase tracking-wider">
+                    {f.label}
+                  </span>
+                  {active && (
+                    <span className="mt-1 inline-block size-1.5 rounded-full bg-primary animate-pulse" />
+                  )}
+                </div>
+              </button>
+            )
+          })}
+        </div>
+
+        {/* Live preview line */}
+        <div className="mt-4 rounded-xl border border-border/40 bg-background/50 p-4">
+          <p className="mb-1 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+            Live Title Preview:
+          </p>
+          <p
+            className={`text-xl font-black tracking-tight sm:text-2xl ${
+              (content.titleFont ?? 'minecraft') === 'minecraft'
+                ? 'font-minecraft'
+                : content.titleFont === 'orbitron'
+                ? 'font-orbitron'
+                : content.titleFont === 'modern'
+                ? 'font-modern'
+                : 'font-mono'
+            }`}
+          >
+            {content.heroTitle || 'STRATOUKOS CLIENT'}
+          </p>
         </div>
       </SectionCard>
     </div>

@@ -77,7 +77,14 @@ export type FooterColumn = {
 }
 
 export type LogoType = 'dynamic-s' | 'dynamic-demon' | 'custom'
-export type TitleFont = 'minecraft' | 'modern' | 'orbitron' | 'mono'
+export type TitleFont = 'minecraft' | 'modern' | 'orbitron' | 'mono' | string
+
+export type CustomFont = {
+  id: string
+  name: string
+  fontFamily: string
+  cssUrl?: string
+}
 
 export type SiteContent = {
   siteName: string
@@ -85,7 +92,8 @@ export type SiteContent = {
   heroSubtitle: string
   downloadName: string
   accentColor: string
-  titleFont: TitleFont     // 'minecraft' | 'modern' | 'orbitron' | 'mono'
+  titleFont: TitleFont     // 'minecraft' | 'modern' | 'orbitron' | 'mono' or custom font ID
+  customFonts: CustomFont[] // user-added custom fonts
   logoType: LogoType       // 'dynamic-s' | 'dynamic-demon' | 'custom'
   logoUrl: string          // custom logo image shown in nav + footer when logoType === 'custom'
   logoTint: boolean        // whether to tint custom logo with site accent color
@@ -115,6 +123,20 @@ export const defaultContent: SiteContent = {
   downloadName: 'Stratoukos Client v2.4.0',
   accentColor: '#ef2d43',
   titleFont: 'minecraft',
+  customFonts: [
+    {
+      id: 'font-pixelify',
+      name: 'Pixelify Sans',
+      fontFamily: "'Pixelify Sans', sans-serif",
+      cssUrl: 'https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@600;700&display=swap',
+    },
+    {
+      id: 'font-press-start',
+      name: 'Press Start 2P',
+      fontFamily: "'Press Start 2P', monospace",
+      cssUrl: 'https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap',
+    },
+  ],
   logoType: 'dynamic-s',
   logoUrl: '/logo.jpg',
   logoTint: true,
@@ -285,6 +307,12 @@ function migrate(content: SiteContent): SiteContent {
     music,
     accentColor: content.accentColor || defaultContent.accentColor,
     titleFont: content.titleFont ?? defaultContent.titleFont,
+    customFonts: (content.customFonts ?? defaultContent.customFonts).map((f, i) => ({
+      id: f.id || `font-${i}`,
+      name: f.name || 'Custom Font',
+      fontFamily: f.fontFamily || 'sans-serif',
+      cssUrl: f.cssUrl || '',
+    })),
     logoType: content.logoType ?? defaultContent.logoType,
     logoUrl: content.logoUrl ?? defaultContent.logoUrl,
     logoTint: typeof content.logoTint === 'boolean' ? content.logoTint : defaultContent.logoTint,

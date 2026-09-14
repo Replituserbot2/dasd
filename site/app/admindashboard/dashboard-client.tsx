@@ -72,13 +72,30 @@ export default function DashboardClient({ initialContent }: { initialContent: Si
 
   const isDirty = useMemo(() => JSON.stringify(content) !== savedSnapshot, [content, savedSnapshot])
 
+  const activeCustomFont = (content.customFonts ?? []).find(
+    (f) => f.id === content.titleFont || f.name.toLowerCase() === content.titleFont?.toLowerCase()
+  )
+
+  const titleFontFamily = activeCustomFont
+    ? activeCustomFont.fontFamily
+    : content.titleFont === 'minecraft'
+    ? "'Silkscreen', 'VT323', monospace"
+    : content.titleFont === 'orbitron'
+    ? "'Orbitron', sans-serif"
+    : content.titleFont === 'modern'
+    ? "var(--font-sans), 'Inter', sans-serif"
+    : content.titleFont === 'mono'
+    ? "'Space Grotesk', monospace"
+    : activeCustomFont?.fontFamily || "'Silkscreen', monospace"
+
   const themeStyle = {
     '--primary': content.accentColor,
     '--ring': content.accentColor,
     '--primary-foreground': accentForeground(content.accentColor),
-    '--neon': accentToRgba(content.accentColor, 0.18),
-    '--neon-soft': accentToRgba(content.accentColor, 0.06),
-    '--neon-hard': accentToRgba(content.accentColor, 0.32),
+    '--neon': accentToRgba(content.accentColor, 0.10),
+    '--neon-soft': accentToRgba(content.accentColor, 0.03),
+    '--neon-hard': accentToRgba(content.accentColor, 0.18),
+    '--title-font': titleFontFamily,
   } as CSSProperties
 
   const update = <K extends keyof SiteContent>(key: K, value: SiteContent[K]) =>
@@ -401,6 +418,11 @@ export default function DashboardClient({ initialContent }: { initialContent: Si
 
   return (
     <main style={themeStyle} className="relative min-h-screen text-foreground">
+      {/* Dynamic font stylesheets for admin preview */}
+      {(content.customFonts ?? []).filter((f) => f.cssUrl).map((f) => (
+        <link key={f.id} rel="stylesheet" href={f.cssUrl} />
+      ))}
+
       {/* Site dynamic background layer matching live site */}
       <SiteBackgroundLayer bg={content.background} />
 

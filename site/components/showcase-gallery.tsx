@@ -17,7 +17,7 @@ export default function ShowcaseGallery({
   title = 'Client Interface & HUD',
   subtitle = 'Experience the sleek, distraction-free interface engineered for maximum clarity and competitive edge.',
   accentColor = '#ef2d43',
-  titleFontClass = 'font-minecraft',
+  titleFontClass = 'font-title',
 }: {
   items: ShowcaseItem[]
   title?: string

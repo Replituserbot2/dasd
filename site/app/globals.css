@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Orbitron:wght@700;900&family=VT323&family=Space+Grotesk:wght@600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Orbitron:wght@700;900&family=VT323&family=Space+Grotesk:wght@600;700&family=Pixelify+Sans:wght@600;700&family=Press+Start+2P&family=Cinzel:wght@700;900&family=Bebas+Neue&family=Rubik+Glitch&family=Chakra+Petch:wght@700&family=Russo+One&display=swap');
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
@@ -49,9 +49,9 @@
   --input: oklch(1 0 0 / 14%);
   --ring: oklch(0.62 0.24 24);
   --radius: 0.7rem;
-  --neon:      rgba(239, 45, 67, 0.18);
-  --neon-soft: rgba(239, 45, 67, 0.06);
-  --neon-hard: rgba(239, 45, 67, 0.32);
+  --neon:      rgba(239, 45, 67, 0.10);
+  --neon-soft: rgba(239, 45, 67, 0.03);
+  --neon-hard: rgba(239, 45, 67, 0.18);
 }
 
 * { @apply border-border outline-ring/50; }
@@ -133,6 +133,12 @@ input[type='range']::-moz-range-thumb     { background: var(--primary); border: 
   font-family: 'Space Grotesk', var(--font-mono), monospace !important;
 }
 
+/* Dynamic title font variable applied to all headings */
+.font-title {
+  font-family: var(--title-font, 'Silkscreen', monospace) !important;
+  letter-spacing: 0.03em;
+}
+
 /* Smooth text pop-up / fade-in animation */
 @keyframes text-popup {
   0% {
@@ -156,17 +162,25 @@ input[type='range']::-moz-range-thumb     { background: var(--primary); border: 
 .delay-350 { animation-delay: 350ms; }
 .delay-500 { animation-delay: 500ms; }
 
-/* Interactive button hover highlight & luminous sheen */
+/* Interactive button hover highlight & luminous sheen (darkened & toned down glow) */
 .btn-highlight {
   position: relative;
   overflow: hidden;
-  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-highlight.bg-primary {
+  background-color: color-mix(in srgb, var(--primary) 82%, #050307) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.btn-highlight.bg-primary:hover {
+  background-color: color-mix(in srgb, var(--primary) 89%, #050307) !important;
+  border-color: rgba(255, 255, 255, 0.16);
 }
 .btn-highlight::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(110deg, transparent 20%, rgba(255, 255, 255, 0.28) 50%, transparent 80%);
+  background: linear-gradient(110deg, transparent 25%, rgba(255, 255, 255, 0.13) 50%, transparent 75%);
   transform: translateX(-100%);
   transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
   pointer-events: none;
@@ -175,7 +189,7 @@ input[type='range']::-moz-range-thumb     { background: var(--primary); border: 
   transform: translateX(100%);
 }
 .btn-highlight:hover {
-  box-shadow: 0 4px 20px var(--neon), 0 0 0 1px rgba(255, 255, 255, 0.16) inset;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5), 0 0 8px var(--neon-soft), 0 0 0 1px rgba(255, 255, 255, 0.12) inset;
   transform: translateY(-2px);
 }
 .btn-highlight:active {

@@ -38,6 +38,7 @@ export default function HomeClient({
     downloadName,
     accentColor,
     titleFont = 'minecraft',
+    customFonts = [],
     logoType,
     logoUrl,
     logoTint,
@@ -58,14 +59,23 @@ export default function HomeClient({
     footerCopyright,
   } = content
 
-  const titleFontClass =
-    titleFont === 'minecraft'
-      ? 'font-minecraft'
-      : titleFont === 'orbitron'
-      ? 'font-orbitron'
-      : titleFont === 'modern'
-      ? 'font-modern'
-      : 'font-mono'
+  const activeCustomFont = (customFonts ?? []).find(
+    (f) => f.id === titleFont || f.name.toLowerCase() === titleFont.toLowerCase()
+  )
+
+  const titleFontFamily = activeCustomFont
+    ? activeCustomFont.fontFamily
+    : titleFont === 'minecraft'
+    ? "'Silkscreen', 'VT323', monospace"
+    : titleFont === 'orbitron'
+    ? "'Orbitron', sans-serif"
+    : titleFont === 'modern'
+    ? "var(--font-sans), 'Inter', sans-serif"
+    : titleFont === 'mono'
+    ? "'Space Grotesk', monospace"
+    : activeCustomFont?.fontFamily || "'Silkscreen', monospace"
+
+  const titleFontClass = 'font-title'
 
   const featured = versions.find((v) => v.id === featuredVersionId) ?? versions[0]
   const [showVersions, setShowVersions] = useState(false)
@@ -75,13 +85,19 @@ export default function HomeClient({
     '--primary': accentColor,
     '--ring': accentColor,
     '--primary-foreground': accentForeground(accentColor),
-    '--neon': accentToRgba(accentColor, 0.18),
-    '--neon-soft': accentToRgba(accentColor, 0.06),
-    '--neon-hard': accentToRgba(accentColor, 0.32),
+    '--neon': accentToRgba(accentColor, 0.10),
+    '--neon-soft': accentToRgba(accentColor, 0.03),
+    '--neon-hard': accentToRgba(accentColor, 0.18),
+    '--title-font': titleFontFamily,
   } as CSSProperties
 
   return (
     <main style={themeStyle} className="relative min-h-screen overflow-hidden text-foreground">
+      {/* ── Dynamic Custom Web Fonts ────────────────────────────── */}
+      {(customFonts ?? []).filter((f) => f.cssUrl).map((f) => (
+        <link key={f.id} rel="stylesheet" href={f.cssUrl} />
+      ))}
+
       {/* ── Animated Background Layer ────────────────────────────── */}
       <SiteBackgroundLayer bg={background} />
 
@@ -125,7 +141,7 @@ export default function HomeClient({
 
           <a
             href="#download"
-            className="btn-highlight flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-2 font-mono text-xs font-bold uppercase tracking-wider text-primary-foreground shadow-[0_2px_12px_var(--neon)] active:scale-95"
+            className="btn-highlight flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-2 font-mono text-xs font-bold uppercase tracking-wider text-primary-foreground shadow-[0_2px_8px_rgba(0,0,0,0.5)] active:scale-95"
           >
             <ArrowDownToLine size={13} />
             Download
@@ -183,7 +199,7 @@ export default function HomeClient({
           <div className="animate-pop-in delay-350 flex flex-col gap-3.5 sm:flex-row">
             <a
               href="#download"
-              className="btn-highlight group relative flex items-center justify-center gap-2.5 rounded-full bg-primary px-8 py-3.5 font-mono text-xs font-bold uppercase tracking-wider text-primary-foreground shadow-[0_4px_16px_var(--neon)] active:scale-95"
+              className="btn-highlight group relative flex items-center justify-center gap-2.5 rounded-full bg-primary px-8 py-3.5 font-mono text-xs font-bold uppercase tracking-wider text-primary-foreground shadow-[0_4px_12px_rgba(0,0,0,0.55)] active:scale-95"
             >
               <ArrowDownToLine size={15} />
               Download now
@@ -191,14 +207,14 @@ export default function HomeClient({
             {showcase.length > 0 ? (
               <a
                 href="#showcase"
-                className="btn-highlight flex items-center justify-center gap-2 rounded-full border border-border/60 bg-card/40 px-8 py-3.5 font-mono text-xs font-bold uppercase tracking-wider text-foreground backdrop-blur-md hover:border-primary/40 active:scale-95"
+                className="btn-highlight flex items-center justify-center gap-2 rounded-full border border-white/10 bg-card/30 px-8 py-3.5 font-mono text-xs font-bold uppercase tracking-wider text-foreground backdrop-blur-md hover:border-primary/30 hover:bg-card/50 active:scale-95 shadow-[0_4px_12px_rgba(0,0,0,0.35)]"
               >
                 View showcase
               </a>
             ) : (
               <a
                 href="#features"
-                className="btn-highlight flex items-center justify-center gap-2 rounded-full border border-border/60 bg-card/40 px-8 py-3.5 font-mono text-xs font-bold uppercase tracking-wider text-foreground backdrop-blur-md hover:border-primary/40 active:scale-95"
+                className="btn-highlight flex items-center justify-center gap-2 rounded-full border border-white/10 bg-card/30 px-8 py-3.5 font-mono text-xs font-bold uppercase tracking-wider text-foreground backdrop-blur-md hover:border-primary/30 hover:bg-card/50 active:scale-95 shadow-[0_4px_12px_rgba(0,0,0,0.35)]"
               >
                 Explore features
               </a>
@@ -305,7 +321,7 @@ export default function HomeClient({
                 href={featured?.fileUrl || '#'}
                 download
                 aria-disabled={!featured?.fileUrl}
-                className="btn-highlight group relative flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-full bg-primary px-7 py-3 font-mono text-xs font-bold uppercase tracking-wider text-primary-foreground shadow-[0_4px_16px_var(--neon)] active:scale-95 aria-disabled:pointer-events-none aria-disabled:opacity-50"
+                className="btn-highlight group relative flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-full bg-primary px-7 py-3 font-mono text-xs font-bold uppercase tracking-wider text-primary-foreground shadow-[0_4px_12px_rgba(0,0,0,0.55)] active:scale-95 aria-disabled:pointer-events-none aria-disabled:opacity-50"
               >
                 <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
                 <ArrowDownToLine size={15} />
